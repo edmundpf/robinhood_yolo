@@ -29,7 +29,7 @@
     "edit-json-file": "^1.2.1",
     "inquirer": "^6.5.0",
     "jsonfile": "^5.0.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.14",
     "moment": "^2.24.0",
     "print-tools-js": "^1.0.8",
     "request": "^2.88.0",
