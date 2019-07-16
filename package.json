@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "test": "./node_modules/.bin/mocha js/tests",
-    "compile": "grunt sync"
+    "compile": "grunt sync",
+    "prepare": "cp src/data/dummy_config.json src/data/config.json && grunt sync"
   },
   "bin": {
     "yolo": "./js/utils/yolo"

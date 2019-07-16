@@ -1,6 +1,7 @@
 a = require('../utils/apiMaster')(newLogin: true)
 p = require 'print-tools-js'
 chalk = require 'chalk'
+configData = require '../data/config.json'
 assert = require('chai').assert
 should = require('chai').should()
 
@@ -30,234 +31,239 @@ presetObject = (func, key, arg1, arg2, arg3, arg4, arg5, arg6) ->
 	it 'Key exists', ->
 		assert.equal(data[key]?, true)
 
-#: Test Constructor
+if configData.length > 0
 
-describe 'constructor()', ->
-	before(() ->
-		await a.login()
-	)
-	it 'Is object', ->
-		a.should.be.a('object')
-	it 'Has username', ->
-		a.username.should.be.a('string')
-	it 'Has access token', ->
-		a.accessToken.should.be.a('string')
-	it 'Has refresh token', ->
-		a.refreshToken.should.be.a('string')
-	it 'Has auth token', ->
-		assert.equal(a.authToken.indexOf('Bearer'), 0)
-	it 'Has account URL', ->
-		a.accountUrl.should.be.a('string')
+	#: Test Constructor
 
-#: Test Account
+	describe 'constructor()', ->
+		before(() ->
+			await a.login()
+		)
+		it 'Is object', ->
+			a.should.be.a('object')
+		it 'Has username', ->
+			a.username.should.be.a('string')
+		it 'Has access token', ->
+			a.accessToken.should.be.a('string')
+		it 'Has refresh token', ->
+			a.refreshToken.should.be.a('string')
+		it 'Has auth token', ->
+			assert.equal(a.authToken.indexOf('Bearer'), 0)
+		it 'Has account URL', ->
+			a.accountUrl.should.be.a('string')
 
-describe 'account()', ->
-	presetObject(
-		a.getAccount,
-		'margin_balances'
-	)
+	#: Test Account
 
-#: Test Market Hours
+	describe 'account()', ->
+		presetObject(
+			a.getAccount,
+			'margin_balances'
+		)
 
-describe 'getMarketHours()', ->
-	presetObject(
-		a.getMarketHours,
-		'is_open'
-		'2019-07-04'
-	)
+	#: Test Market Hours
 
-#: Test Transfers
+	describe 'getMarketHours()', ->
+		presetObject(
+			a.getMarketHours,
+			'is_open'
+			'2019-07-04'
+		)
 
-describe 'getTransfers()', ->
-	presetList(
-		a.getTransfers,
-		'scheduled'
-	)
+	#: Test Transfers
 
-#: Test Quotes for single instrument
+	describe 'getTransfers()', ->
+		presetList(
+			a.getTransfers,
+			'scheduled'
+		)
 
-describe 'quotes() - single', ->
-	presetObject(
-		a.quotes,
-		'chain_data',
-		'GE',
-		chainData: true
-	)
+	#: Test Quotes for single instrument
 
-#: Test Quotes for multiple instruments
+	describe 'quotes() - single', ->
+		presetObject(
+			a.quotes,
+			'chain_data',
+			'GE',
+			chainData: true
+		)
 
-describe 'quotes() - multiple', ->
-	presetList(
-		a.quotes,
-		'chain_data',
-		['GE', 'AAPL'],
-		chainData: true
-	)
+	#: Test Quotes for multiple instruments
 
-#: Test Historicals
+	describe 'quotes() - multiple', ->
+		presetList(
+			a.quotes,
+			'chain_data',
+			['GE', 'AAPL'],
+			chainData: true
+		)
 
-describe 'historicals()', ->
-	presetList(
-		a.historicals,
-		'close_price',
-		'GE',
-		interval: 'day'
-		span: 'year'
-		bounds: 'regular'
-	)
-	it 'Test Multiple instruments', ->
-		data = await a.historicals(['GE', 'AAPL'])
-		data[0].should.be.a('array')
+	#: Test Historicals
 
-#: Test Get Options
+	describe 'historicals()', ->
+		presetList(
+			a.historicals,
+			'close_price',
+			'GE',
+			interval: 'day'
+			span: 'year'
+			bounds: 'regular'
+		)
+		it 'Test Multiple instruments', ->
+			data = await a.historicals(['GE', 'AAPL'])
+			data[0].should.be.a('array')
 
-describe 'getOptions()', ->
-	presetList(
-		a.getOptions,
-		'market_data',
-		'GE',
-		'2021-01-15',
-		optionType: 'call'
-		marketData: true
-	)
+	#: Test Get Options
 
-#: Test Find Options for single option
-
-describe 'findOptions() - single', ->
-	presetObject(
-		a.findOptions,
-		'market_data',
-		'GE',
-		'2021-01-15',
-		optionType: 'call'
-		strikeType: 'itm'
-		strikeDepth: 0
-		marketData: true
-	)
-
-#: Test Find Options by strike price
-
-describe 'findOptions() - strike', ->
-	presetObject(
-		a.findOptions,
-		'market_data',
-		'GE',
-		'2021-01-15',
-		optionType: 'call'
-		strike: 11.00
-		marketData: true
-	)
-
-#: Test Find Options for multiple options
-
-describe 'findOptions() - range', ->
-	presetList(
-		a.findOptions,
-		'strike_price',
-		'GE',
-		'2021-01-15',
-		optionType: 'call'
-		range: 3
-	)
-
-#: Test Options Positions for all
-
-describe 'optionsPositions() - all', ->
-	presetList(
-		a.optionsPositions,
-		'chain_symbol',
-		marketData: false
-		orderData: false
-		openOnly: false
-	)
-
-#: Test Options Positions for open only
-
-describe 'optionsPositions() - open only', ->
-	data = null
-	before(() ->
-		this.timeout(15000)
-		data = await a.optionsPositions(
+	describe 'getOptions()', ->
+		presetList(
+			a.getOptions,
+			'market_data',
+			'GE',
+			'2021-01-15',
+			optionType: 'call'
 			marketData: true
-			orderData: true
 		)
-	)
-	it 'Returns array', ->
-		data.should.be.a('array')
-	if data? && data.length != 0
-		it 'Key exists', ->
-			assert.equal(data[0]['market_data']?, true)
-	else
-		p.error(chalk'No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.')
 
-#: Test Options Orders for all orders
+	#: Test Find Options for single option
 
-describe 'optionsOrders() - all', ->
-	presetList(
-		a.optionsOrders,
-		'legs',
-	)
-
-#: Test Options Orders for not filled
-
-describe 'optionsOrders() - not filled', ->
-	data = null
-	before(() ->
-		this.timeout(15000)
-		data = await a.optionsOrders(
-			notFilled: true
+	describe 'findOptions() - single', ->
+		presetObject(
+			a.findOptions,
+			'market_data',
+			'GE',
+			'2021-01-15',
+			optionType: 'call'
+			strikeType: 'itm'
+			strikeDepth: 0
+			marketData: true
 		)
-	)
-	it 'Returns array', ->
-		data.should.be.a('array')
-	if data? && data.length != 0
-		it 'Key exists', ->
-			assert.equal(data[0]['legs']?, true)
-	else
-		p.error(chalk'No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.')
 
-#: Test Options Orders for single order
+	#: Test Find Options by strike price
 
-describe 'optionsOrders() - single', ->
-	presetObject(
-		a.optionsOrders,
-		'legs',
-		id: 'af8d5deb-df2f-42a7-974e-7e16729937f7'
-	)
+	describe 'findOptions() - strike', ->
+		presetObject(
+			a.findOptions,
+			'market_data',
+			'GE',
+			'2021-01-15',
+			optionType: 'call'
+			strike: 11.00
+			marketData: true
+		)
 
-#: Test Placing Options orders, replacing, and canceling
+	#: Test Find Options for multiple options
 
-describe 'Placing Orders', ->
-	data = buy = replace = cancel = null
-	closedMarkets = false
-	before(() ->
-		this.timeout(15000)
-		curTime = new Date()
-		dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
-		if dateNum > 160100
-			closedMarkets = true
-			data = await a.findOptions(
-				'TSLA',
-				'2021-01-15',
-				strikeDepth: 3
+	describe 'findOptions() - range', ->
+		presetList(
+			a.findOptions,
+			'strike_price',
+			'GE',
+			'2021-01-15',
+			optionType: 'call'
+			range: 3
+		)
+
+	#: Test Options Positions for all
+
+	describe 'optionsPositions() - all', ->
+		presetList(
+			a.optionsPositions,
+			'chain_symbol',
+			marketData: false
+			orderData: false
+			openOnly: false
+		)
+
+	#: Test Options Positions for open only
+
+	describe 'optionsPositions() - open only', ->
+		data = null
+		before(() ->
+			this.timeout(15000)
+			data = await a.optionsPositions(
+				marketData: true
+				orderData: true
 			)
-			buy = await a.placeOptionOrder(data.url, 1, 0.01)
-			replace = await a.replaceOptionOrder(1, 0.02, { orderId: buy.id })
-			cancel = await a.cancelOptionOrder(replace.cancel_url)
-	)
-	if closedMarkets
-		p.success('Markets are closed, will test placing orders.')
-		it 'Buy returns object', ->
-			buy.should.be.a('object')
-		it 'Buy key exists', ->
-			assert.equal(buy.id?, true)
-		it 'Replace returns object', ->
-			replace.should.be.a('object')
-		it 'Replace key exists', ->
-			assert.equal(replace.id?, true)
-		it 'Cancel returns true', ->
-			assert.equal(cancel, true)
-	else
-		p.error(chalk'Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.')
+		)
+		it 'Returns array', ->
+			data.should.be.a('array')
+		if data? && data.length != 0
+			it 'Key exists', ->
+				assert.equal(data[0]['market_data']?, true)
+		else
+			p.error(chalk'No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.')
+
+	#: Test Options Orders for all orders
+
+	describe 'optionsOrders() - all', ->
+		presetList(
+			a.optionsOrders,
+			'legs',
+		)
+
+	#: Test Options Orders for not filled
+
+	describe 'optionsOrders() - not filled', ->
+		data = null
+		before(() ->
+			this.timeout(15000)
+			data = await a.optionsOrders(
+				notFilled: true
+			)
+		)
+		it 'Returns array', ->
+			data.should.be.a('array')
+		if data? && data.length != 0
+			it 'Key exists', ->
+				assert.equal(data[0]['legs']?, true)
+		else
+			p.error(chalk'No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.')
+
+	#: Test Options Orders for single order
+
+	describe 'optionsOrders() - single', ->
+		presetObject(
+			a.optionsOrders,
+			'legs',
+			id: 'af8d5deb-df2f-42a7-974e-7e16729937f7'
+		)
+
+	#: Test Placing Options orders, replacing, and canceling
+
+	describe 'Placing Orders', ->
+		data = buy = replace = cancel = null
+		closedMarkets = false
+		before(() ->
+			this.timeout(15000)
+			curTime = new Date()
+			dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
+			if dateNum > 160100
+				closedMarkets = true
+				data = await a.findOptions(
+					'TSLA',
+					'2021-01-15',
+					strikeDepth: 3
+				)
+				buy = await a.placeOptionOrder(data.url, 1, 0.01)
+				replace = await a.replaceOptionOrder(1, 0.02, { orderId: buy.id })
+				cancel = await a.cancelOptionOrder(replace.cancel_url)
+		)
+		if closedMarkets
+			p.success('Markets are closed, will test placing orders.')
+			it 'Buy returns object', ->
+				buy.should.be.a('object')
+			it 'Buy key exists', ->
+				assert.equal(buy.id?, true)
+			it 'Replace returns object', ->
+				replace.should.be.a('object')
+			it 'Replace key exists', ->
+				assert.equal(replace.id?, true)
+			it 'Cancel returns true', ->
+				assert.equal(cancel, true)
+		else
+			p.error(chalk'Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.')
+
+else
+	p.error('No accounts in config file. Exiting.')
 
 #::: End Program :::
