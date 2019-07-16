@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+
+# Grunt Storage
+.grunt
+
+# Auth Data
+# DISCARD IF PUBLIC REPO
+# config.json

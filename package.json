@@ -1,0 +1,49 @@
+{
+  "name": "robinhood-yolo",
+  "version": "1.0.0",
+  "description": "Package: robinhood_yolo",
+  "main": "./js/index.js",
+  "files": [
+    "/js"
+  ],
+  "scripts": {
+    "test": "./node_modules/.bin/mocha js/tests",
+    "compile": "grunt sync"
+  },
+  "bin": {
+    "yolo": "./js/utils/yolo"
+  },
+  "author": "Edmund Pfeil {edmundpf@buffalo.edu}",
+  "homepage": "https://github.com/edmundpf/robinhood_yolo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edmundpf/robinhood_yolo"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "base-64": "^0.1.0",
+    "chalk": "^2.4.2",
+    "commander": "^2.20.0",
+    "death": "^1.1.0",
+    "edit-json-file": "^1.2.1",
+    "inquirer": "^6.5.0",
+    "jsonfile": "^5.0.0",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
+    "print-tools-js": "^1.0.6",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
+    "terminal-kit": "^1.28.3",
+    "utf8": "^3.0.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "grunt": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-coffee": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-watch": "*",
+    "mocha": "*"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../src/",
+  "sources": [
+    "index.coffee"
+  ],
+  "names": [],
+  "mappings": "AAAA,IAAA;;AAAA,GAAA,GAAM,OAAA,CAAQ,mBAAR;;AAEN,MAAM,CAAC,OAAP,GAAiB;;AAFjB",
+  "sourcesContent": [
+    "api = require './utils/apiMaster'\n\nmodule.exports = api\n\n#::: End Program :::"
+  ]
+}
