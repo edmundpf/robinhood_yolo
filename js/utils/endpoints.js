@@ -103,5 +103,3 @@ endpoints = {
 module.exports = endpoints;
 
 //::: End Program :::
-
-//# sourceMappingURL=endpoints.js.map

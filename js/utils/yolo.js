@@ -913,5 +913,3 @@ ON_DEATH(function(signal, err) {
 main();
 
 //::: End Program :::
-
-//# sourceMappingURL=yolo.js.map

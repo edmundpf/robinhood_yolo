@@ -36,7 +36,6 @@ module.exports = (grunt) ->
 			compile:
 				options:
 					bare: true
-					sourceMap: true
 				expand: true
 				flatten: false
 				cwd: 'src'

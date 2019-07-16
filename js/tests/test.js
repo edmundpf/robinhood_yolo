@@ -248,5 +248,3 @@ if (configData.length > 0) {
 }
 
 //::: End Program :::
-
-//# sourceMappingURL=test.js.map
