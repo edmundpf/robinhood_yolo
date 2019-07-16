@@ -3,7 +3,10 @@
 [![npm version](https://badge.fury.io/js/robinhood-yolo.svg)](https://badge.fury.io/js/robinhood-yolo)
 > Robinhood Options API written in Coffeescript and console CLI w/ included stop_loss, account history, positions watch, etc. ☕
 ## Install
-* `npm i -g robinhood-yolo`
+* To use the CLI
+	* `npm i -g robinhood-yolo`
+* To use the API in your project
+	* `npm i -S robinhood-yolo`
 ## Usage
 ``` bash
 $ yolo -h
