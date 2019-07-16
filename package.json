@@ -1,6 +1,6 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Package: robinhood_yolo",
   "main": "./js/index.js",
   "files": [
@@ -12,7 +12,7 @@
     "prepare": "cp src/data/dummy_config.json src/data/config.json && grunt sync"
   },
   "bin": {
-    "yolo": "node js/utils/yolo"
+    "yolo": "./js/utils/yolo.js"
   },
   "author": "Edmund Pfeil {edmundpf@buffalo.edu}",
   "homepage": "https://github.com/edmundpf/robinhood_yolo",

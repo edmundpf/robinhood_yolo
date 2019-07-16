@@ -1,3 +1,4 @@
+#!/usr/bin/env node;
 var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dayTrades, defaults, deleteAccountCom, editAccountCom, findCom, inquirer, main, moment, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
   indexOf = [].indexOf;
 
