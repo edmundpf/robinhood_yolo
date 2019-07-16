@@ -1,4 +1,5 @@
-`#!/usr/bin/env node`
+`#!/usr/bin/env node
+`
 com = require('commander')
 moment = require('moment')
 term = require('terminal-kit').terminal
