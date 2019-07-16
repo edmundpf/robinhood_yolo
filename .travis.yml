@@ -1,5 +1,8 @@
-language: node_js
+language:
+  - node_js
+node_js:
+  - "node"
 before_script:
-	- npm install --dev
+  - npm install --dev
 script:
-	- npm test
+  - npm test
