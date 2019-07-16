@@ -247,6 +247,7 @@ api = require('robinhood-yolo')()
 	``` javascript
 	await api.optionsOrders()
 	await api.optionsOrders({ urls: null, id: null, notFilled: false, buyOnly: false })
+	```
 	* Returns list of options orders
 	* Optional args
 		* urls (list)
@@ -281,6 +282,7 @@ api = require('robinhood-yolo')()
 * *cancelOptionOrder()*
 	``` javascript
 	await api.cancelOptionOrder('CANCEL_URL_HERE')
+	```
 	* Cancels option order
 	* Required args
 		* cancelUrl (string)
