@@ -1,5 +1,3 @@
-api = require './utils/apiMaster'
-
-module.exports = api
+module.exports = require('./utils/apiMaster')
 
 #::: End Program :::
