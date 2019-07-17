@@ -472,6 +472,7 @@ posWatchCom = async function(com) {
   return setInterval(async() => {
     var ask_count, ask_price, bid_count, bid_price, cur_time, delta, expiry, j, len, option_type, pos, posDet, posLog, posText, posUrl, pos_market, pos_quote, price, quote, spyLog, spyPrice, spy_quote, strike, symbol, theta, volatility, volume;
     try {
+      cur_time = Number(moment().format('HHmmss'));
       spy_quote = (await api.quotes('SPY'));
       spyPrice = (cur_time >= 93000 && cur_time < 160000) ? roundNum(spy_quote.last_trade_price, 3) : roundNum(spy_quote.last_extended_hours_trade_price, 3);
       spyLog = p.bullet(`SPY: ${spyPrice} | Bid - ${spy_quote.bid_size} | Ask - ${spy_quote.ask_size}`, {
@@ -483,7 +484,6 @@ posWatchCom = async function(com) {
         pos_quote = (await api.quotes(pos.chain_symbol));
         pos_market = (await api.marketData(pos.option_data.id));
         symbol = pos.chain_symbol;
-        cur_time = Number(moment().format('HHmmss'));
         option_type = pos.option_data.type === 'call' ? 'C' : 'P';
         strike = roundNum(pos.option_data.strike_price, 1);
         expiry = pos.option_data.expiration_date.replace(/-/g, '/');
