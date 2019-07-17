@@ -1,4 +1,4 @@
-var a, assert, chalk, configData, p, presetList, presetObject, should;
+var a, assert, chalk, configData, error, moment, p, presetList, presetObject, should;
 
 a = require('../utils/apiMaster')({
   newLogin: true
@@ -8,11 +8,21 @@ p = require('print-tools-js');
 
 chalk = require('chalk');
 
-configData = require('../data/config.json');
+moment = require('moment');
 
 assert = require('chai').assert;
 
 should = require('chai').should();
+
+//: Check for data file
+configData = null;
+
+try {
+  configData = require('../../config.json');
+} catch (error1) {
+  error = error1;
+  configData = [];
+}
 
 //: List Preset
 presetList = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
@@ -107,6 +117,10 @@ if (configData.length > 0) {
       data = (await a.historicals(['GE', 'AAPL']));
       return data[0].should.be.a('array');
     });
+  });
+  //: Test Options Historicals
+  describe('optionsHistoricals()', function() {
+    return presetList(a.findOptionHistoricals, 'begins_at', 'GE', moment().subtract(moment().day() + 2, 'days').format('YYYY-MM-DD'));
   });
   //: Test Get Options
   describe('getOptions()', function() {

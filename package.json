@@ -1,6 +1,6 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Package: robinhood_yolo",
   "main": "./js/index.js",
   "files": [
@@ -8,8 +8,7 @@
   ],
   "scripts": {
     "test": "./node_modules/.bin/mocha js/tests",
-    "compile": "grunt sync",
-    "prepare": "cp src/data/dummy_config.json src/data/config.json && grunt sync"
+    "compile": "grunt sync"
   },
   "bin": {
     "yolo": "./js/utils/yolo.js"

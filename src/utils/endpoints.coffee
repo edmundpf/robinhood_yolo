@@ -69,6 +69,18 @@ endpoints =
 		)
 		return "#{api}/quotes/historicals/#{query}/"
 
+	#: Get Historical Quotes for options chains
+
+	optionsHistoricals: (instruments, interval='day', span='year') ->
+		if Array.isArray(instruments)
+			instruments = instruments.join(',')
+		query = queryStr(
+			instruments: instruments
+			interval: interval
+			span: span
+		)
+		return "#{api}/marketdata/options/historicals/#{query}"
+
 	#: Get Option Chains
 
 	chain: (instrumentId) ->
@@ -82,6 +94,17 @@ endpoints =
 			expiration_dates: dates
 			state: 'active'
 			tradability: 'tradable'
+			type: option_type
+		)
+		return "#{api}/options/instruments/#{query}"
+
+	#: Get All Options (including expired)
+
+	expiredOptions: (chainId, dates, option_type='call') ->
+		query = queryStr(
+			chain_id: chainId
+			expiration_dates: dates
+			state: 'expired'
 			type: option_type
 		)
 		return "#{api}/options/instruments/#{query}"

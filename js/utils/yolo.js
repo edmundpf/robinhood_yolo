@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 ;
-var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dayTrades, defaults, deleteAccountCom, editAccountCom, findCom, inquirer, main, moment, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
+var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, error, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
   indexOf = [].indexOf;
 
 com = require('commander');
@@ -14,10 +14,6 @@ ON_DEATH = require('death');
 roundNum = require('./miscFunctions').roundNum;
 
 colorPrint = require('./miscFunctions').colorPrint;
-
-configData = require('../data/config.json');
-
-defaults = require('../data/defaults.json');
 
 b64Dec = require('./miscFunctions').b64Dec;
 
@@ -33,11 +29,32 @@ p = require('print-tools-js');
 
 chalk = require('chalk');
 
+//: Init API
 api = require('./apiMaster')({
   newLogin: false,
   configIndex: 0,
   print: true
 });
+
+//: Get data files
+configData = defaults = null;
+
+try {
+  configData = require('../../config.json');
+} catch (error1) {
+  error = error1;
+  configData = [];
+}
+
+try {
+  defaults = require('../../defaults.json');
+} catch (error1) {
+  error = error1;
+  defaults = {
+    stopLoss: 0.2,
+    poorFillTime: 93500
+  };
+}
 
 //: Main Program
 main = function() {
@@ -45,13 +62,13 @@ main = function() {
   //: Option Keys
   keys = ['login', 'ticker', 'url', 'id', 'expiry', 'option_type', 'strike_type', 'quantity', 'price', 'depth', 'range', 'command'];
   //: Options
-  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, trades, watch, stop_loss, quote, position, find, buy, sell, cancel, replace]').action(async function() {
-    var c, error, j, k, key, len, len1, ref, results;
+  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, trades, watch, stop_loss, quote, position, find, buy, sell, cancel, replace]').action(async function() {
+    var c, j, k, key, len, len1, ref, results;
     try {
       if (com.login_index == null) {
         com.login_index = 0;
       }
-      if (configData.length > 0 && !com.command.includes('account')) {
+      if (configData.length > 0 && !com.command.includes('account') && !['edit_settings'].includes(com.command)) {
         await api.login({
           configIndex: com.login_index
         });
@@ -87,6 +104,9 @@ main = function() {
           //: Delete Account
           } else if (c === 'delete_account') {
             results.push(deleteAccountCom(com));
+          //: Edit Settings
+          } else if (c === 'edit_settings') {
+            results.push(editSettingsCom(com));
           //: Trades
           } else if (c === 'trades') {
             results.push(tradeCom(com));
@@ -192,7 +212,7 @@ showAccountsCom = function(com) {
 
 //: Add Account Commmand
 addAccountCom = async function(com) {
-  var answer, error, newConfig;
+  var answer, newConfig;
   p.success('This will add a new account to the config.');
   try {
     answer = (await inquirer.prompt([
@@ -224,7 +244,7 @@ addAccountCom = async function(com) {
       t_s: 0
     };
     configData.push(newConfig);
-    updateJson('../data/config.json', configData);
+    updateJson('../../config.json', configData);
     return p.success(`${answer.username} added successfully.`);
   } catch (error1) {
     error = error1;
@@ -234,7 +254,7 @@ addAccountCom = async function(com) {
 
 //: Edit Account Command
 editAccountCom = async function(com) {
-  var acc, account, accounts, answer, error, j, len, newConfig;
+  var acc, account, accounts, answer, j, len, newConfig;
   p.success('This will edit account details in the config.');
   try {
     accounts = [];
@@ -276,7 +296,7 @@ editAccountCom = async function(com) {
       p_w: b64Enc(answer.password)
     };
     configData[accounts.indexOf(acc.account)] = {...configData[accounts.indexOf(acc.account)], ...newConfig};
-    updateJson('../data/config.json', configData);
+    updateJson('../../config.json', configData);
     return p.success(`${answer.username} edited successfully.`);
   } catch (error1) {
     error = error1;
@@ -286,7 +306,7 @@ editAccountCom = async function(com) {
 
 //: Delete Account Command
 deleteAccountCom = async function(com) {
-  var acc, account, accounts, error, j, len;
+  var acc, account, accounts, j, len;
   p.success('This will delete an account from the config.');
   try {
     accounts = [];
@@ -305,7 +325,7 @@ deleteAccountCom = async function(com) {
         }
       ]));
       configData.splice(accounts.indexOf(acc.account), 1);
-      overwriteJson('../data/config.json', configData);
+      overwriteJson('../../config.json', configData);
       return p.success(`${acc.account} deleted successfully.`);
     } else {
       return p.error("Config has no accounts.");
@@ -314,6 +334,40 @@ deleteAccountCom = async function(com) {
     error = error1;
     p.error('Could not delete account.');
     return console.log(error);
+  }
+};
+
+//: Edit Settings Command
+editSettingsCom = async function(com) {
+  var answer, key;
+  p.success('This will edit settings.');
+  try {
+    answer = (await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'stopLoss',
+        message: 'Enter stop-loss percentage:',
+        default: defaults.stopLoss,
+        validate: isNumber,
+        filter: parsePrice
+      },
+      {
+        type: 'input',
+        name: 'poorFillTime',
+        message: 'Enter cut-off time to prevent poor stop-loss fills:',
+        default: defaults.poorFillTime,
+        validate: isNumber,
+        filter: parseInt
+      }
+    ]));
+    for (key in answer) {
+      defaults[key] = answer[key];
+    }
+    updateJson('../../defaults.json', defaults);
+    return p.success('Settings updated successfully.');
+  } catch (error1) {
+    error = error1;
+    return p.error('Could not edit settings.');
   }
 };
 
@@ -413,7 +467,7 @@ posWatchCom = async function(com) {
     orderData: true
   }));
   return setInterval(async() => {
-    var ask_count, ask_price, bid_count, bid_price, cur_time, delta, error, expiry, j, len, option_type, pos, posDet, posLog, posText, posUrl, pos_market, pos_quote, price, quote, spyLog, spyPrice, spy_quote, strike, symbol, theta, volatility, volume;
+    var ask_count, ask_price, bid_count, bid_price, cur_time, delta, expiry, j, len, option_type, pos, posDet, posLog, posText, posUrl, pos_market, pos_quote, price, quote, spyLog, spyPrice, spy_quote, strike, symbol, theta, volatility, volume;
     try {
       spy_quote = (await api.quotes('SPY'));
       spyPrice = (cur_time >= 93000 && cur_time < 160000) ? roundNum(spy_quote.last_trade_price, 3) : roundNum(spy_quote.last_extended_hours_trade_price, 3);
@@ -492,7 +546,7 @@ stopLossWatch = async function(com) {
     }
   }
   return setInterval(async() => {
-    var bid_price, buy_price, cur_pos, current_price, error, expiry, high, id, j, len, openPos, option_type, pos, posDet, posLog, posText, positions, sell_args, soldPosition, stop_loss, strike, symbol;
+    var bid_price, buy_price, cur_pos, current_price, expiry, high, id, j, len, openPos, option_type, pos, posDet, posLog, posText, positions, sell_args, soldPosition, stop_loss, strike, symbol;
     try {
       positions = (await api.optionsPositions({
         marketData: true
@@ -830,9 +884,27 @@ printOrder = function(option, quote, buy) {
 
 //::: Helpers :::
 
+//: Check if number
+isNumber = function(text) {
+  if (text.length === 0 || !isNaN(text)) {
+    return true;
+  } else {
+    return 'Please enter a valid number.';
+  }
+};
+
+//: Check if not empty
+notEmpty = function(text) {
+  if (text.length > 0) {
+    return true;
+  } else {
+    return 'Please enter a valid string.';
+  }
+};
+
 //: Parse Int
 parseInt = function(val) {
-  return Number(val);
+  return roundNum(val, 0);
 };
 
 //: Parse Price

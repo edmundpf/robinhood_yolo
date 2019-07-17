@@ -1,4 +1,4 @@
-var Api, assert, b64Dec, configData, detPrint, endpoints, newApiObj, p, request, roundNum, sleep, sortOptions, updateJson, uuid;
+var Api, assert, b64Dec, configData, defaults, detPrint, endpoints, error, newApiObj, overwriteJson, p, request, roundNum, sleep, sortOptions, updateJson, uuid;
 
 p = require('print-tools-js');
 
@@ -10,17 +10,41 @@ endpoints = require('./endpoints');
 
 request = require('request-promise');
 
-configData = require('../data/config.json');
-
 b64Dec = require('./miscFunctions').b64Dec;
 
 updateJson = require('./miscFunctions').updateJson;
+
+overwriteJson = require('./miscFunctions').overwriteJson;
 
 detPrint = require('./miscFunctions').detPrint;
 
 roundNum = require('./miscFunctions').roundNum;
 
 sortOptions = require('./miscFunctions').sortOptions;
+
+//: Check for data files
+
+//: Check for data files
+configData = defaults = null;
+
+try {
+  configData = require('../../config.json');
+} catch (error1) {
+  error = error1;
+  configData = [];
+  overwriteJson('../../config.json', configData);
+}
+
+try {
+  defaults = require('../../defaults.json');
+} catch (error1) {
+  error = error1;
+  defaults = {
+    stopLoss: 0.2,
+    poorFillTime: 93500
+  };
+  overwriteJson('../../defaults.json', defaults);
+}
 
 //: API Object
 Api = class Api {
@@ -63,7 +87,6 @@ Api = class Api {
       newLogin: false,
       configIndex: 0
     }) {
-    var error;
     args = {
       newLogin: false,
       configIndex: 0,
@@ -96,7 +119,7 @@ Api = class Api {
       newLogin: false,
       configIndex: 0
     }) {
-    var accUrl, error, res;
+    var accUrl, res;
     try {
       args = {
         newLogin: false,
@@ -131,7 +154,7 @@ Api = class Api {
           a_u: this.accountUrl,
           t_s: Date.now()
         });
-        updateJson('../data/config.json', configData);
+        updateJson('../../config.json', configData);
       } else {
         this.accessToken = configData[this.configIndex].a_t;
         this.refreshToken = configData[this.configIndex].r_t;
@@ -153,7 +176,7 @@ Api = class Api {
 
   //: Get Account Info
   async getAccount() {
-    var data, error;
+    var data;
     try {
       data = (await this.getUrl(endpoints.accounts(), true));
       return data[0];
@@ -165,7 +188,6 @@ Api = class Api {
 
   //: Get Transfers
   async getTransfers() {
-    var error;
     try {
       return (await this.getUrl(endpoints.transfers(), true));
     } catch (error1) {
@@ -176,7 +198,6 @@ Api = class Api {
 
   //: Get Market Hours
   async getMarketHours(date) {
-    var error;
     try {
       return (await this.getUrl(endpoints.marketHours(date)));
     } catch (error1) {
@@ -189,7 +210,7 @@ Api = class Api {
   async quotes(symbols, args = {
       chainData: false
     }) {
-    var data, error, j, len, obj;
+    var data, j, len, obj;
     try {
       args = {
         chainData: false,
@@ -226,7 +247,7 @@ Api = class Api {
       span: 'year',
       bounds: 'regular'
     }) {
-    var arr, data, error, j, len, ref, symbolData;
+    var arr, data, j, len, ref, symbolData;
     try {
       args = {
         interval: 'day',
@@ -254,7 +275,6 @@ Api = class Api {
 
   //: Get Instrument Data
   async chain(instrumentId) {
-    var error;
     try {
       return (await this.getUrl(endpoints.chain(instrumentId), true));
     } catch (error1) {
@@ -265,7 +285,6 @@ Api = class Api {
 
   //: Get Market Data
   async marketData(optionId) {
-    var error;
     try {
       return (await this.getUrl(endpoints.marketData(optionId)));
     } catch (error1) {
@@ -277,13 +296,15 @@ Api = class Api {
   //: Get Options
   async getOptions(symbol, expirationDate, args = {
       optionType: 'call',
-      marketData: false
+      marketData: false,
+      expired: false
     }) {
-    var chainData, chainId, data, error, j, k, len, len1, obj, ticker;
+    var chainData, chainId, data, j, k, len, len1, obj, ticker;
     try {
       args = {
         optionType: 'call',
         marketData: false,
+        expired: false,
         ...args
       };
       chainId;
@@ -297,7 +318,11 @@ Api = class Api {
           chainId = ticker.id;
         }
       }
-      data = (await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), true));
+      if (!args.expired) {
+        data = (await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), true));
+      } else {
+        data = (await this.getUrl(endpoints.expiredOptions(chainId, expirationDate, args.optionType), true));
+      }
       if (args.marketData) {
         for (k = 0, len1 = data.length; k < len1; k++) {
           obj = data[k];
@@ -318,9 +343,10 @@ Api = class Api {
       strikeDepth: 0,
       marketData: false,
       range: null,
-      strike: null
+      strike: null,
+      expired: false
     }) {
-    var curTime, dateNum, error, i, itmIndex, j, k, len, obj, options, quote, ref, strikePrice;
+    var curTime, dateNum, i, itmIndex, j, k, len, obj, options, quote, ref, strikePrice;
     try {
       args = {
         optionType: 'call',
@@ -329,12 +355,14 @@ Api = class Api {
         marketData: false,
         range: null,
         strike: null,
+        expired: false,
         ...args
       };
       curTime = new Date();
       dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds();
       options = (await this.getOptions(symbol, expirationDate, {
-        optionType: args.optionType
+        optionType: args.optionType,
+        expired: args.expired
       }));
       options.sort(sortOptions);
       if (args.strike != null) {
@@ -392,6 +420,37 @@ Api = class Api {
     }
   }
 
+  //: Get Options Historicals
+  async findOptionHistoricals(symbol, expirationDate, args = {
+      optionType: 'call',
+      strikeType: 'itm',
+      strikeDepth: 0,
+      strike: null,
+      expired: true,
+      interval: 'hour',
+      span: 'month'
+    }) {
+    var data, option;
+    try {
+      args = {
+        optionType: 'call',
+        strikeType: 'itm',
+        strikeDepth: 0,
+        strike: null,
+        expired: true,
+        interval: 'hour',
+        span: 'month',
+        ...args
+      };
+      option = (await this.findOptions(symbol, expirationDate, args));
+      data = (await this.getUrl(endpoints.optionsHistoricals(option.url, args.interval, args.span), true));
+      return data[0].data_points;
+    } catch (error1) {
+      error = error1;
+      throw error;
+    }
+  }
+
   //: Get Options Postions
   async optionsPositions(args = {
       marketData: false,
@@ -399,7 +458,7 @@ Api = class Api {
       openOnly: true,
       notFilled: false
     }) {
-    var arg, breakLoop, data, error, j, k, key, l, leg, len, len1, len2, len3, len4, len5, len6, m, n, notFilled, o, obj, openData, options, orderData, orders, pos, q, ref, value;
+    var arg, breakLoop, data, j, k, key, l, leg, len, len1, len2, len3, len4, len5, len6, m, n, notFilled, o, obj, openData, options, orderData, orders, pos, q, ref, value;
     try {
       args = {
         markedData: false,
@@ -492,7 +551,7 @@ Api = class Api {
       notFilled: false,
       buyOnly: false
     }) {
-    var data, error, fetchOrders, j, len, notFilled, order;
+    var data, fetchOrders, j, len, notFilled, order;
     try {
       data;
       args = {
@@ -575,7 +634,7 @@ Api = class Api {
       positionEffect: 'open',
       legs: null
     }) {
-    var error, legs;
+    var legs;
     try {
       legs;
       args = {
@@ -627,7 +686,7 @@ Api = class Api {
 
   //: Cancel Option Order
   async cancelOptionOrder(cancelUrl) {
-    var data, error;
+    var data;
     try {
       assert(typeof cancelUrl === 'string');
       data = (await this.postUrl(cancelUrl, {}));
@@ -647,7 +706,7 @@ Api = class Api {
       order: null,
       orderId: null
     }) {
-    var data, error;
+    var data;
     try {
       data;
       args = {
@@ -696,7 +755,7 @@ Api = class Api {
 
   //: Get URL
   async getUrl(url, consume = false) {
-    var data, error, pages;
+    var data, pages;
     try {
       if (!consume) {
         return (await this.session.get({
@@ -727,7 +786,6 @@ Api = class Api {
 
   //: Post URL
   async postUrl(url, data) {
-    var error;
     try {
       return (await this.session.post({
         uri: url,
@@ -745,7 +803,7 @@ Api = class Api {
 
   //: Get Data from URL based on Condition
   async getDataFromUrl(url, conditionFunc, args) {
-    var data, error, hasArrayArgs, res, resKeys, results;
+    var data, hasArrayArgs, res, resKeys, results;
     try {
       results = {};
       resKeys;

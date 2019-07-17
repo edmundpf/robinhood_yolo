@@ -21,7 +21,7 @@ b64Enc = (text) ->
 #: Round Number
 
 roundNum = (number, places=2) ->
-	return parseFloat(String(number)).toFixed(places)
+	return parseFloat(parseFloat(String(number)).toFixed(places))
 
 #: Title Case
 

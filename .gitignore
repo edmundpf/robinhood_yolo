@@ -5,5 +5,7 @@ node_modules/
 .grunt
 
 # Auth Data
-# DISCARD IF PUBLIC REPO
-# config.json
+config.json
+
+# Defaults
+defaults.json

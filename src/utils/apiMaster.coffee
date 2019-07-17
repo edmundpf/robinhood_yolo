@@ -3,12 +3,36 @@ uuid = require 'uuid/v4'
 assert = require 'assert'
 endpoints = require './endpoints'
 request = require 'request-promise'
-configData = require '../data/config.json'
 b64Dec = require('./miscFunctions').b64Dec
 updateJson = require('./miscFunctions').updateJson
+overwriteJson = require('./miscFunctions').overwriteJson
 detPrint = require('./miscFunctions').detPrint
 roundNum = require('./miscFunctions').roundNum
 sortOptions = require('./miscFunctions').sortOptions
+
+#: Check for data files
+
+#: Check for data files
+
+configData = defaults = null
+try
+	configData = require '../../config.json'
+catch error
+	configData = []
+	overwriteJson(
+		'../../config.json',
+		configData
+	)
+try
+	defaults = require '../../defaults.json'
+catch error
+	defaults =
+		stopLoss: 0.2
+		poorFillTime: 93500
+	overwriteJson(
+		'../../defaults.json',
+		defaults
+	)
 
 #: API Object
 
@@ -107,7 +131,7 @@ class Api
 					t_s: Date.now()
 				)
 				updateJson(
-					'../data/config.json',
+					'../../config.json',
 					configData
 				)
 			else
@@ -213,11 +237,12 @@ class Api
 
 	#: Get Options
 
-	getOptions: (symbol, expirationDate, args={ optionType: 'call', marketData: false }) ->
+	getOptions: (symbol, expirationDate, args={ optionType: 'call', marketData: false, expired: false }) ->
 		try
 			args = {
 				optionType: 'call'
 				marketData: false
+				expired: false
 				...args
 			}
 			chainId
@@ -226,7 +251,10 @@ class Api
 			for ticker in chainData
 				if ticker.symbol == symbol
 					chainId = ticker.id
-			data = await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), true)
+			if !args.expired
+				data = await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), true)
+			else
+				data = await this.getUrl(endpoints.expiredOptions(chainId, expirationDate, args.optionType), true)
 			if args.marketData
 				for obj in data
 					obj.market_data = await this.marketData(obj.id)
@@ -236,7 +264,7 @@ class Api
 
 	#: Find Options
 
-	findOptions: (symbol, expirationDate, args={ optionType: 'call', strikeType: 'itm', strikeDepth: 0, marketData: false, range: null, strike: null }) ->
+	findOptions: (symbol, expirationDate, args={ optionType: 'call', strikeType: 'itm', strikeDepth: 0, marketData: false, range: null, strike: null, expired: false }) ->
 		try
 			args = {
 				optionType: 'call'
@@ -245,11 +273,12 @@ class Api
 				marketData: false
 				range: null
 				strike: null
+				expired: false
 				...args
 			}
 			curTime = new Date()
 			dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
-			options = await this.getOptions(symbol, expirationDate, { optionType: args.optionType })
+			options = await this.getOptions(symbol, expirationDate, { optionType: args.optionType, expired: args.expired })
 			options.sort(sortOptions)
 			if args.strike?
 				args.strike = roundNum(args.strike)
@@ -290,6 +319,26 @@ class Api
 				return options[0]
 			else
 				return options
+		catch error
+			throw error
+
+	#: Get Options Historicals
+
+	findOptionHistoricals: (symbol, expirationDate, args={ optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, interval: 'hour', span: 'month' }) ->
+		try
+			args = {
+				optionType: 'call'
+				strikeType: 'itm'
+				strikeDepth: 0
+				strike: null
+				expired: true
+				interval: 'hour'
+				span: 'month'
+				...args
+			}
+			option = await this.findOptions(symbol, expirationDate, args)
+			data = await this.getUrl(endpoints.optionsHistoricals(option.url, args.interval, args.span), true)
+			return data[0].data_points
 		catch error
 			throw error
 

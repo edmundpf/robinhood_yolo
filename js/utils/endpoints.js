@@ -65,6 +65,19 @@ endpoints = {
     });
     return `${api}/quotes/historicals/${query}/`;
   },
+  //: Get Historical Quotes for options chains
+  optionsHistoricals: function(instruments, interval = 'day', span = 'year') {
+    var query;
+    if (Array.isArray(instruments)) {
+      instruments = instruments.join(',');
+    }
+    query = queryStr({
+      instruments: instruments,
+      interval: interval,
+      span: span
+    });
+    return `${api}/marketdata/options/historicals/${query}`;
+  },
   //: Get Option Chains
   chain: function(instrumentId) {
     return `${api}/options/chains/?equity_instrument_ids=${instrumentId}`;
@@ -77,6 +90,17 @@ endpoints = {
       expiration_dates: dates,
       state: 'active',
       tradability: 'tradable',
+      type: option_type
+    });
+    return `${api}/options/instruments/${query}`;
+  },
+  //: Get All Options (including expired)
+  expiredOptions: function(chainId, dates, option_type = 'call') {
+    var query;
+    query = queryStr({
+      chain_id: chainId,
+      expiration_dates: dates,
+      state: 'expired',
       type: option_type
     });
     return `${api}/options/instruments/${query}`;

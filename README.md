@@ -187,7 +187,9 @@ api = require('robinhood-yolo')()
 		* ticker(s) (string || array)
 	* Optional args
 		* interval (string)
+			* time interval (see src/endpoints.coffee for allowed interval/span combinations)
 		* span	(string)
+			* time span (see src/endpoints.coffee for allowed interval/span combinations)
 		* bounds (string)
 * *getOptions()*
 	``` javascript
@@ -204,6 +206,8 @@ api = require('robinhood-yolo')()
 			* *call* || *put*
 		* marketData (boolean)
 			* If false does not include market data, otherwise includes market data
+		* expired (boolean)
+			* if true includes expired options in search, else excludes expired options
 * *findOptions()*
 	``` javascript
 	await api.findOptions('TSLA', '2019-07-19')
@@ -227,6 +231,33 @@ api = require('robinhood-yolo')()
 			* if not null, will return list of range. For example, if range equals 3, 3 otm and 3 itm options will be returned
 		* strike (Number)
 			* if not null, will return option at exact strike price
+		* expired (boolean)
+			* if true includes expired options in search, else excludes expired options
+* *findOptionsHistoricals()*
+	``` javascript
+	await api.findOptionsHistoricals('TSLA', '2019-07-19')
+	await api.findOptionsHistoricals('TSLA', '2019-07-19', { optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, interval: 'hour', span: 'month' })
+	```	
+	* Finds option historical data
+	* Returns list of data
+	* Required args
+		* symbol (string)
+		* expirationDate (string)	
+	* Optional args
+		* optionType (string)
+			* *call* || *put*
+		* strikeType (string)
+			* *itm* || *otm*
+		* strikeDepth (int)
+			* strike price depth, 0-based
+		* strike (Number)
+			* if not null, will return option at exact strike price
+		* expired (boolean)
+			* if true includes expired options in search, else excludes expired options
+		* interval (string)
+			* time interval (see src/endpoints.coffee for allowed interval/span combinations)
+		* span	(string)
+			* time span (see src/endpoints.coffee for allowed interval/span combinations)
 * *optionsPositions()*
 	``` javascript
 	await api.optionsPositions()

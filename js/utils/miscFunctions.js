@@ -30,7 +30,7 @@ b64Enc = function(text) {
 
 //: Round Number
 roundNum = function(number, places = 2) {
-  return parseFloat(String(number)).toFixed(places);
+  return parseFloat(parseFloat(String(number)).toFixed(places));
 };
 
 //: Title Case

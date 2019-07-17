@@ -6,8 +6,6 @@ term = require('terminal-kit').terminal
 ON_DEATH = require('death')
 roundNum = require('./miscFunctions').roundNum
 colorPrint = require('./miscFunctions').colorPrint
-configData = require '../data/config.json'
-defaults = require '../data/defaults.json'
 b64Dec = require('./miscFunctions').b64Dec
 b64Enc = require('./miscFunctions').b64Enc
 updateJson = require('./miscFunctions').updateJson
@@ -15,11 +13,28 @@ overwriteJson = require('./miscFunctions').overwriteJson
 inquirer = require('inquirer')
 p = require 'print-tools-js'
 chalk = require 'chalk'
+
+#: Init API
+
 api = require('./apiMaster')(
 	newLogin: false
 	configIndex: 0
 	print: true
 )
+
+#: Get data files
+
+configData = defaults = null
+try
+	configData = require '../../config.json'
+catch error
+	configData = []
+try
+	defaults = require '../../defaults.json'
+catch error
+	defaults =
+		stopLoss: 0.2
+		poorFillTime: 93500
 
 #: Main Program
 
@@ -57,7 +72,7 @@ main = ->
 		.option('-d, --depth <depth>', 'Add option depth', parseInt)
 		.option('-r, --range <range>', 'Add option range', parseInt)
 		.option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
-			'delete_account, trades, watch, stop_loss, quote, position, find, buy, sell, cancel, replace]')
+			'delete_account, edit_settings, trades, watch, stop_loss, quote, position, find, buy, sell, cancel, replace]')
 		.action(() ->
 
 			try
@@ -66,7 +81,7 @@ main = ->
 
 				if !com.login_index?
 					com.login_index = 0
-				if configData.length > 0 && !com.command.includes('account')
+				if configData.length > 0 && !com.command.includes('account') && !['edit_settings'].includes(com.command)
 					await api.login(configIndex: com.login_index)
 
 				#: List-type options parsing
@@ -106,6 +121,11 @@ main = ->
 
 						else if c == 'delete_account'
 							deleteAccountCom(com)
+
+						#: Edit Settings
+
+						else if c == 'edit_settings'
+							editSettingsCom(com)
 
 						#: Trades
 						else if c == 'trades'
@@ -236,7 +256,7 @@ addAccountCom = (com) ->
 			t_s: 0
 		configData.push(newConfig)
 		updateJson(
-			'../data/config.json',
+			'../../config.json',
 			configData
 		)
 		p.success("#{answer.username} added successfully.")
@@ -295,7 +315,7 @@ editAccountCom = (com) ->
 			...newConfig
 		}
 		updateJson(
-			'../data/config.json',
+			'../../config.json',
 			configData
 		)
 		p.success("#{answer.username} edited successfully.")
@@ -327,7 +347,7 @@ deleteAccountCom = (com) ->
 
 			configData.splice(accounts.indexOf(acc.account), 1)
 			overwriteJson(
-				'../data/config.json',
+				'../../config.json',
 				configData
 			)
 			p.success("#{acc.account} deleted successfully.")
@@ -337,6 +357,40 @@ deleteAccountCom = (com) ->
 	catch error
 		p.error('Could not delete account.')
 		console.log(error)
+
+#: Edit Settings Command
+
+editSettingsCom = (com) ->
+
+	p.success('This will edit settings.')
+	try
+		answer = await inquirer.prompt([
+			{
+				type: 'input'
+				name: 'stopLoss'
+				message: 'Enter stop-loss percentage:'
+				default: defaults.stopLoss
+				validate: isNumber
+				filter: parsePrice
+			},
+			{
+				type: 'input'
+				name: 'poorFillTime'
+				message: 'Enter cut-off time to prevent poor stop-loss fills:'
+				default: defaults.poorFillTime
+				validate: isNumber
+				filter: parseInt
+			}
+		])
+		for key of answer
+			defaults[key] = answer[key]
+		updateJson(
+			'../../defaults.json'
+			defaults
+		)
+		p.success('Settings updated successfully.')
+	catch error
+		p.error('Could not edit settings.')
 
 #: Trades Command
 
@@ -819,10 +873,26 @@ printOrder = (option, quote, buy) ->
 
 #::: Helpers :::
 
+#: Check if number
+
+isNumber = (text) ->
+	if text.length == 0 or !isNaN(text)
+		return true
+	else
+		return 'Please enter a valid number.'
+
+#: Check if not empty
+
+notEmpty = (text) ->
+	if text.length > 0
+		return true
+	else
+		return 'Please enter a valid string.'
+
 #: Parse Int
 
 parseInt = (val) ->
-	return Number(val)
+	return roundNum(val, 0)
 
 #: Parse Price
 
