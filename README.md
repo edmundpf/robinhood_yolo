@@ -54,8 +54,12 @@ $ yolo -h
 			* Stops max loss after 20% loss on option price
 			* If option is between 10%-20% gains, stop loss will preserve gains and will sell if price drops to $0.01 over original buy price
 			* If option is greater than 20% gains, stop loss will sell after a 20% loss from the *high* price after the option was purchased
+		* Use **stop_loss_sim** command to get printouts **ONLY**, no orders will be placed
 		``` bash
+		# Stop Loss (places orders)
 		$ yolo -c stop_loss
+		# Stop Loss Simulation (printouts only, no orders placed)
+		$ yolo -c stop_loss_sim
 		```
 	* **quote**
 		* Get quote for stock symbol
