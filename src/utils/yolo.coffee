@@ -599,7 +599,7 @@ stopLossWatch = (com, placeOrder=false) ->
 						posText += p.error(
 							"Stop-Loss (Max Loss) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
 							ret: true
-							log: false
+							log: true
 						) + '\n'
 						if TRADE_COUNT < 3 && placeOrder
 							terminatePosition(cur_pos, sell_args)
@@ -612,7 +612,7 @@ stopLossWatch = (com, placeOrder=false) ->
 						posText += p.error(
 							"Stop-Loss (Prevent Defeat) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
 							ret: true
-							log: false
+							log: true
 						) + '\n'
 						if TRADE_COUNT < 3 && placeOrder
 							terminatePosition(cur_pos, sell_args)
@@ -625,7 +625,7 @@ stopLossWatch = (com, placeOrder=false) ->
 						posText += p.error(
 							"Stop-Loss (Preserve Gains) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
 							ret: true
-							log: false
+							log: true
 						) + '\n'
 						if TRADE_COUNT < 3 && placeOrder
 							terminatePosition(cur_pos, sell_args)
@@ -635,7 +635,7 @@ stopLossWatch = (com, placeOrder=false) ->
 				posLog = p.chevron(
 					"#{symbol}-#{option_type}-#{strike}-#{expiry} | Buy Price: #{buy_price}",
 					ret: true
-					log: false
+					log: true
 				)
 				posDet = p.bullet(
 					"Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
