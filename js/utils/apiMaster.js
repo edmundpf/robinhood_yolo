@@ -40,7 +40,7 @@ try {
 } catch (error1) {
   error = error1;
   defaults = {
-    stopLoss: 0.2,
+    stopLoss: 0.25,
     poorFillTime: 93500
   };
   overwriteJson('../../defaults.json', defaults);

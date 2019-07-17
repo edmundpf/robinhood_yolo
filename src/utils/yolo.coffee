@@ -33,7 +33,7 @@ try
 	defaults = require '../../defaults.json'
 catch error
 	defaults =
-		stopLoss: 0.2
+		stopLoss: 0.25
 		poorFillTime: 93500
 
 #: Main Program
@@ -72,7 +72,7 @@ main = ->
 		.option('-d, --depth <depth>', 'Add option depth', parseInt)
 		.option('-r, --range <range>', 'Add option range', parseInt)
 		.option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
-			'delete_account, edit_settings, trades, watch, stop_loss, quote, position, find, buy, sell, cancel, replace]')
+			'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]')
 		.action(() ->
 
 			try
@@ -139,7 +139,12 @@ main = ->
 						#: Stop Loss
 
 						else if c == 'stop_loss'
-							stopLossWatch(com)
+							stopLossWatch(com, true)
+
+						#: Stop Loss Simulation (logs only, WILL NOT SELL)
+
+						else if c == 'stop_loss_sim'
+							stopLossWatch(com, false)
 
 						#: Quotes
 
@@ -517,7 +522,7 @@ posWatchCom = (com) ->
 
 #: Stop Loss Watch
 
-stopLossWatch = (com) ->
+stopLossWatch = (com, placeOrder=false) ->
 	p.success('Getting open positions')
 	day_trades = await dayTrades()
 	TRADE_COUNT = Object.keys(day_trades).length
@@ -591,10 +596,12 @@ stopLossWatch = (com) ->
 				if cur_pos.high < (cur_pos.price * (1 + MAX_LOSS / 2))
 					stop_loss = roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS))
 					if current_price <= stop_loss
-						p.error(
+						posText += p.error(
 							"Stop-Loss (Max Loss) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
-						)
-						if TRADE_COUNT < 3
+							ret: true
+							log: false
+						) + '\n'
+						if TRADE_COUNT < 3 && placeOrder
 							terminatePosition(cur_pos, sell_args)
 
 				# High >= Price * 1.1 && High < Price * 1.2
@@ -604,8 +611,10 @@ stopLossWatch = (com) ->
 					if current_price <= stop_loss
 						posText += p.error(
 							"Stop-Loss (Prevent Defeat) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
-						)
-						if TRADE_COUNT < 3
+							ret: true
+							log: false
+						) + '\n'
+						if TRADE_COUNT < 3 && placeOrder
 							terminatePosition(cur_pos, sell_args)
 
 				# High >= Price * 1.2
@@ -615,8 +624,10 @@ stopLossWatch = (com) ->
 					if current_price <= stop_loss
 						posText += p.error(
 							"Stop-Loss (Preserve Gains) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
-						)
-						if TRADE_COUNT < 3
+							ret: true
+							log: false
+						) + '\n'
+						if TRADE_COUNT < 3 && placeOrder
 							terminatePosition(cur_pos, sell_args)
 
 				# Log

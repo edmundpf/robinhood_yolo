@@ -51,7 +51,7 @@ try {
 } catch (error1) {
   error = error1;
   defaults = {
-    stopLoss: 0.2,
+    stopLoss: 0.25,
     poorFillTime: 93500
   };
 }
@@ -62,7 +62,7 @@ main = function() {
   //: Option Keys
   keys = ['login', 'ticker', 'url', 'id', 'expiry', 'option_type', 'strike_type', 'quantity', 'price', 'depth', 'range', 'command'];
   //: Options
-  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, trades, watch, stop_loss, quote, position, find, buy, sell, cancel, replace]').action(async function() {
+  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]').action(async function() {
     var c, j, k, key, len, len1, ref, results;
     try {
       if (com.login_index == null) {
@@ -115,7 +115,10 @@ main = function() {
             results.push(posWatchCom(com));
           //: Stop Loss
           } else if (c === 'stop_loss') {
-            results.push(stopLossWatch(com));
+            results.push(stopLossWatch(com, true));
+          //: Stop Loss Simulation (logs only, WILL NOT SELL)
+          } else if (c === 'stop_loss_sim') {
+            results.push(stopLossWatch(com, false));
           //: Quotes
           } else if (c === 'quote') {
             results.push(quoteCom(com));
@@ -518,7 +521,7 @@ posWatchCom = async function(com) {
 };
 
 //: Stop Loss Watch
-stopLossWatch = async function(com) {
+stopLossWatch = async function(com, placeOrder = false) {
   var MAX_LOSS, TRADE_COUNT, answer, day_trades, market_time, pos_data;
   p.success('Getting open positions');
   day_trades = (await dayTrades());
@@ -590,8 +593,11 @@ stopLossWatch = async function(com) {
         if (cur_pos.high < (cur_pos.price * (1 + MAX_LOSS / 2))) {
           stop_loss = roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS));
           if (current_price <= stop_loss) {
-            p.error(`Stop-Loss (Max Loss) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`);
-            if (TRADE_COUNT < 3) {
+            posText += p.error(`Stop-Loss (Max Loss) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`, {
+              ret: true,
+              log: false
+            }) + '\n';
+            if (TRADE_COUNT < 3 && placeOrder) {
               terminatePosition(cur_pos, sell_args);
             }
           }
@@ -599,8 +605,11 @@ stopLossWatch = async function(com) {
         } else if (cur_pos.high >= (cur_pos.price * (1 + MAX_LOSS / 2)) && cur_pos.high < (cur_pos.price * (1 + MAX_LOSS))) {
           stop_loss = roundNum(cur_pos.price + 0.01);
           if (current_price <= stop_loss) {
-            posText += p.error(`Stop-Loss (Prevent Defeat) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`);
-            if (TRADE_COUNT < 3) {
+            posText += p.error(`Stop-Loss (Prevent Defeat) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`, {
+              ret: true,
+              log: false
+            }) + '\n';
+            if (TRADE_COUNT < 3 && placeOrder) {
               terminatePosition(cur_pos, sell_args);
             }
           }
@@ -608,8 +617,11 @@ stopLossWatch = async function(com) {
         } else if (cur_pos.high >= (cur_pos.price * (1 + MAX_LOSS))) {
           stop_loss = (cur_pos.high - (cur_pos.price * MAX_LOSS)) >= (current_price + 0.01) ? roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS)) : roundNum(current_price + 0.01);
           if (current_price <= stop_loss) {
-            posText += p.error(`Stop-Loss (Preserve Gains) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`);
-            if (TRADE_COUNT < 3) {
+            posText += p.error(`Stop-Loss (Preserve Gains) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`, {
+              ret: true,
+              log: false
+            }) + '\n';
+            if (TRADE_COUNT < 3 && placeOrder) {
               terminatePosition(cur_pos, sell_args);
             }
           }

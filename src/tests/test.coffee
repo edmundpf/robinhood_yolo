@@ -209,7 +209,7 @@ if configData.length > 0
 			it 'Key exists', ->
 				assert.equal(data[0]['market_data']?, true)
 		else
-			p.error(chalk'No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.')
+			p.warning(chalk'No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.')
 
 	#: Test Options Orders for all orders
 
@@ -235,7 +235,7 @@ if configData.length > 0
 			it 'Key exists', ->
 				assert.equal(data[0]['legs']?, true)
 		else
-			p.error(chalk'No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.')
+			p.warning(chalk'No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.')
 
 	#: Test Options Orders for single order
 
@@ -279,7 +279,7 @@ if configData.length > 0
 			it 'Cancel returns true', ->
 				assert.equal(cancel, true)
 		else
-			p.error(chalk'Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.')
+			p.warning(chalk'Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.')
 
 else
 	p.error('No accounts in config file. Exiting.')

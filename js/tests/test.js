@@ -180,7 +180,7 @@ if (configData.length > 0) {
         return assert.equal(data[0]['market_data'] != null, true);
       });
     } else {
-      return p.error(chalk`No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.`);
+      return p.warning(chalk`No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.`);
     }
   });
   //: Test Options Orders for all orders
@@ -205,7 +205,7 @@ if (configData.length > 0) {
         return assert.equal(data[0]['legs'] != null, true);
       });
     } else {
-      return p.error(chalk`No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.`);
+      return p.warning(chalk`No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.`);
     }
   });
   //: Test Options Orders for single order
@@ -254,7 +254,7 @@ if (configData.length > 0) {
         return assert.equal(cancel, true);
       });
     } else {
-      return p.error(chalk`Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.`);
+      return p.warning(chalk`Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.`);
     }
   });
 } else {
