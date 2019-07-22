@@ -122,8 +122,26 @@ endpoints =
 			return "#{api}/options/orders/"
 
 	#: Get Market Data
+
 	marketData: (optionId) ->
 		return "#{api}/marketdata/options/#{optionId}/"
+
+	#: Get Watchlist
+
+	watchList: (name='Default') ->
+		return "#{api}/watchlists/#{name}/"
+
+	#: Add to Watchlist
+
+	addToWatchList: (id, name='Default') ->
+		return "#{api}/watchlists/#{name}/#{id}/"
+
+	#: Reorder Watchlist
+
+	reorderWatchList: (ids, name='Default') ->
+		if Array.isArray(ids)
+			ids = ids.join(',')
+		return "#{api}/watchlists/#{name}/reorder/#{ids}/"
 
 #: Exports
 

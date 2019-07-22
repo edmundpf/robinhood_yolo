@@ -119,6 +119,21 @@ endpoints = {
   //: Get Market Data
   marketData: function(optionId) {
     return `${api}/marketdata/options/${optionId}/`;
+  },
+  //: Get Watchlist
+  watchList: function(name = 'Default') {
+    return `${api}/watchlists/${name}/`;
+  },
+  //: Add to Watchlist
+  addToWatchList: function(id, name = 'Default') {
+    return `${api}/watchlists/${name}/${id}/`;
+  },
+  //: Reorder Watchlist
+  reorderWatchList: function(ids, name = 'Default') {
+    if (Array.isArray(ids)) {
+      ids = ids.join(',');
+    }
+    return `${api}/watchlists/${name}/reorder/${ids}/`;
   }
 };
 

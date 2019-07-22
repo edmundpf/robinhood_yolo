@@ -85,6 +85,16 @@ if configData.length > 0
 			'scheduled'
 		)
 
+	#: Test Get Watchlist
+
+	describe 'getWatchList()', ->
+		presetList(
+			a.getWatchList,
+			'quote_data',
+			instrumentData: true
+			quoteData: true
+		)
+
 	#: Test Quotes for single instrument
 
 	describe 'quotes() - single', ->

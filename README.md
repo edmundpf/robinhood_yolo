@@ -168,6 +168,18 @@ api = require('robinhood-yolo')()
 	* Gets Market Hours info for date
 	* Required args
 		* date (string)
+* *getWatchList()*
+	``` javascript
+	await api.getWatchList({ watchList: 'Default', instrumentData: false, quoteData: false })
+	```
+	* Gets Watch List items
+	* Optional args
+		* watchList (string)
+			* Watch list name
+		* instrumentData (boolean)
+			* if true includes instrument data
+		* quoteData (boolean)
+			* if true includes quote data
 * *quotes()*
 	``` javascript
 	await api.quotes('TSLA')
@@ -198,7 +210,7 @@ api = require('robinhood-yolo')()
 * *getOptions()*
 	``` javascript
 	await api.getOptions('TSLA', '2019-07-19')
-	await api.getOptions('TSLA', '2019-07-19', { optionType: 'call', marketData: false })
+	await api.getOptions('TSLA', '2019-07-19', { optionType: 'call', marketData: false, expired: false })
 	```
 	* Gets list of available options for ticker
 	* Returns list
@@ -215,7 +227,7 @@ api = require('robinhood-yolo')()
 * *findOptions()*
 	``` javascript
 	await api.findOptions('TSLA', '2019-07-19')
-	await api.findOptions('TSLA', '2019-07-19', { optionType: 'call', strikeType: 'itm', strikeDepth: 0, marketData: false, range: null, strike: null })
+	await api.findOptions('TSLA', '2019-07-19', { optionType: 'call', strikeType: 'itm', strikeDepth: 0, marketData: false, range: null, strike: null, expired: false })
 	```	
 	* Finds options by args
 	* Either returns a list of a range of options, or a single option dict

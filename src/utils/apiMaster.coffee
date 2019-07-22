@@ -12,8 +12,6 @@ sortOptions = require('./miscFunctions').sortOptions
 
 #: Check for data files
 
-#: Check for data files
-
 configData = defaults = null
 try
 	configData = require '../../config.json'
@@ -171,6 +169,33 @@ class Api
 	getMarketHours: (date) ->
 		try
 			return await this.getUrl(endpoints.marketHours(date))
+		catch error
+			throw error
+
+	#: Get Watch List
+
+	getWatchList: (args={ watchList: 'Default', instrumentData: false, quoteData: false }) ->
+		try
+			args = {
+				watchList: 'Default'
+				instrumentData: false
+				quoteData: false
+				...args
+			}
+			tickers = []
+			data = await this.getUrl(endpoints.watchList(args.watchList), true)
+			for ticker in data
+				ticker.id = ticker.instrument.match('(?<=instruments\/).[^\/]+')[0]
+				if args.instrumentData
+					instData = await this.getUrl(ticker.instrument)
+					ticker.instrument_data = instData
+				if args.quoteData
+					tickers.push(ticker.instrument_data.symbol)
+			if args.quoteData
+				quotes = await this.quotes(tickers)
+				for i in [0...data.length]
+					data[i].quote_data = quotes[i]
+			return data
 		catch error
 			throw error
 

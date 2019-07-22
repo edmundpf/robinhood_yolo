@@ -23,8 +23,6 @@ roundNum = require('./miscFunctions').roundNum;
 sortOptions = require('./miscFunctions').sortOptions;
 
 //: Check for data files
-
-//: Check for data files
 configData = defaults = null;
 
 try {
@@ -200,6 +198,46 @@ Api = class Api {
   async getMarketHours(date) {
     try {
       return (await this.getUrl(endpoints.marketHours(date)));
+    } catch (error1) {
+      error = error1;
+      throw error;
+    }
+  }
+
+  //: Get Watch List
+  async getWatchList(args = {
+      watchList: 'Default',
+      instrumentData: false,
+      quoteData: false
+    }) {
+    var data, i, instData, j, k, len, quotes, ref, ticker, tickers;
+    try {
+      args = {
+        watchList: 'Default',
+        instrumentData: false,
+        quoteData: false,
+        ...args
+      };
+      tickers = [];
+      data = (await this.getUrl(endpoints.watchList(args.watchList), true));
+      for (j = 0, len = data.length; j < len; j++) {
+        ticker = data[j];
+        ticker.id = ticker.instrument.match('(?<=instruments\/).[^\/]+')[0];
+        if (args.instrumentData) {
+          instData = (await this.getUrl(ticker.instrument));
+          ticker.instrument_data = instData;
+        }
+        if (args.quoteData) {
+          tickers.push(ticker.instrument_data.symbol);
+        }
+      }
+      if (args.quoteData) {
+        quotes = (await this.quotes(tickers));
+        for (i = k = 0, ref = data.length; (0 <= ref ? k < ref : k > ref); i = 0 <= ref ? ++k : --k) {
+          data[i].quote_data = quotes[i];
+        }
+      }
+      return data;
     } catch (error1) {
       error = error1;
       throw error;

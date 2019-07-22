@@ -93,6 +93,13 @@ if (configData.length > 0) {
   describe('getTransfers()', function() {
     return presetList(a.getTransfers, 'scheduled');
   });
+  //: Test Get Watchlist
+  describe('getWatchList()', function() {
+    return presetList(a.getWatchList, 'quote_data', {
+      instrumentData: true,
+      quoteData: true
+    });
+  });
   //: Test Quotes for single instrument
   describe('quotes() - single', function() {
     return presetObject(a.quotes, 'chain_data', 'GE', {
