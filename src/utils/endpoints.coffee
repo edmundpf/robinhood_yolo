@@ -104,7 +104,6 @@ endpoints =
 		query = queryStr(
 			chain_id: chainId
 			expiration_dates: dates
-			state: 'expired'
 			type: option_type
 		)
 		return "#{api}/options/instruments/#{query}"

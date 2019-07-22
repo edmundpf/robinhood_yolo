@@ -966,14 +966,14 @@ dayTrades = async function() {
     }
   }
   for (i = k = 0, ref = orders.length; (0 <= ref ? k < ref : k > ref); i = 0 <= ref ? ++k : --k) {
-    if (orders[i].legs[0].executions.length >= 1 && Number(moment(orders[i].legs[0].executions[0].timestamp).format('YYYYMMDD')) < cutoff_date) {
+    if (orders[i].legs[0].executions.length > 0 && Number(moment(orders[i].legs[0].executions[0].timestamp).format('YYYYMMDD')) < cutoff_date) {
       break;
     }
-    if (orders[i].state === 'filled' && orders[i].legs[0].executions.length >= 1 && orders[i].legs[0].side === 'sell' && orders[i].legs[0].position_effect === 'close') {
+    if (orders[i].state === 'filled' && orders[i].legs[0].executions.length > 0 && orders[i].legs[0].side === 'sell' && orders[i].legs[0].position_effect === 'close') {
       sell_date = moment(orders[i].legs[0].executions[0].timestamp).format('YYYY-MM-DD');
       if (days.includes(sell_date)) {
         for (x = l = ref1 = i + 1, ref2 = orders.length; (ref1 <= ref2 ? l < ref2 : l > ref2); x = ref1 <= ref2 ? ++l : --l) {
-          if (orders[i].option === orders[x].option && orders[x].legs[0].executions.length >= 1 && orders[x].legs[0].side === 'buy' && orders[x].legs[0].position_effect === 'open') {
+          if (orders[x].state === 'filled' && orders[i].legs[0].option === orders[x].legs[0].option && orders[x].legs[0].executions.length > 0 && orders[x].legs[0].side === 'buy' && orders[x].legs[0].position_effect === 'open') {
             buy_date = moment(orders[x].legs[0].executions[0].timestamp).format('YYYY-MM-DD');
             if (buy_date === sell_date) {
               day_trades[orders[i].legs[0].option] = {

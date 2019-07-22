@@ -1,6 +1,6 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Package: robinhood_yolo",
   "main": "./js/index.js",
   "files": [
