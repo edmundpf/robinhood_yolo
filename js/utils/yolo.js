@@ -592,7 +592,7 @@ stopLossWatch = async function(com, placeOrder = false) {
         // High < Price * 1.1
         if (cur_pos.high < (cur_pos.price * (1 + MAX_LOSS / 2))) {
           stop_loss = roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS));
-          if (current_price <= stop_loss) {
+          if (bid_price <= stop_loss) {
             posText += p.error(`Stop-Loss (Max Loss) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`, {
               ret: true,
               log: true
@@ -604,7 +604,7 @@ stopLossWatch = async function(com, placeOrder = false) {
         // High >= Price * 1.1 && High < Price * 1.2
         } else if (cur_pos.high >= (cur_pos.price * (1 + MAX_LOSS / 2)) && cur_pos.high < (cur_pos.price * (1 + MAX_LOSS))) {
           stop_loss = roundNum(cur_pos.price + 0.01);
-          if (current_price <= stop_loss) {
+          if (bid_price <= stop_loss) {
             posText += p.error(`Stop-Loss (Prevent Defeat) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`, {
               ret: true,
               log: true
@@ -615,8 +615,8 @@ stopLossWatch = async function(com, placeOrder = false) {
           }
         // High >= Price * 1.2
         } else if (cur_pos.high >= (cur_pos.price * (1 + MAX_LOSS))) {
-          stop_loss = (cur_pos.high - (cur_pos.price * MAX_LOSS)) >= (current_price + 0.01) ? roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS)) : roundNum(current_price + 0.01);
-          if (current_price <= stop_loss) {
+          stop_loss = (cur_pos.high - (cur_pos.price * MAX_LOSS)) >= (current_price + 0.01) ? roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS)) : roundNum(curpos.price + 0.01);
+          if (bid_price <= stop_loss) {
             posText += p.error(`Stop-Loss (Preserve Gains) triggered: Symbol: ${symbol} | Current Price: ${current_price} | Bid Price: ${bid_price} | Stop Loss: ${stop_loss}`, {
               ret: true,
               log: true
