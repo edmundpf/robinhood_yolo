@@ -4,33 +4,12 @@ assert = require 'assert'
 endpoints = require './endpoints'
 request = require 'request-promise'
 b64Dec = require('./miscFunctions').b64Dec
-updateJson = require('./miscFunctions').updateJson
-overwriteJson = require('./miscFunctions').overwriteJson
 detPrint = require('./miscFunctions').detPrint
 roundNum = require('./miscFunctions').roundNum
 sortOptions = require('./miscFunctions').sortOptions
-
-#: Check for data files
-
-configData = defaults = null
-try
-	configData = require '../../config.json'
-catch error
-	configData = []
-	overwriteJson(
-		'../../config.json',
-		configData
-	)
-try
-	defaults = require '../../defaults.json'
-catch error
-	defaults =
-		stopLoss: 0.25
-		poorFillTime: 93500
-	overwriteJson(
-		'../../defaults.json',
-		defaults
-	)
+updateJson = require('./dataStore').updateJson
+defaults = require('./dataStore').defaults
+configData = require('./dataStore').configData
 
 #: API Object
 
@@ -129,7 +108,7 @@ class Api
 					t_s: Date.now()
 				)
 				updateJson(
-					'../../config.json',
+					'yolo_config',
 					configData
 				)
 			else

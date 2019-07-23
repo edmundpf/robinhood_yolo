@@ -1,4 +1,4 @@
-var Api, assert, b64Dec, configData, defaults, detPrint, endpoints, error, newApiObj, overwriteJson, p, request, roundNum, sleep, sortOptions, updateJson, uuid;
+var Api, assert, b64Dec, configData, defaults, detPrint, endpoints, newApiObj, p, request, roundNum, sleep, sortOptions, updateJson, uuid;
 
 p = require('print-tools-js');
 
@@ -12,37 +12,17 @@ request = require('request-promise');
 
 b64Dec = require('./miscFunctions').b64Dec;
 
-updateJson = require('./miscFunctions').updateJson;
-
-overwriteJson = require('./miscFunctions').overwriteJson;
-
 detPrint = require('./miscFunctions').detPrint;
 
 roundNum = require('./miscFunctions').roundNum;
 
 sortOptions = require('./miscFunctions').sortOptions;
 
-//: Check for data files
-configData = defaults = null;
+updateJson = require('./dataStore').updateJson;
 
-try {
-  configData = require('../../config.json');
-} catch (error1) {
-  error = error1;
-  configData = [];
-  overwriteJson('../../config.json', configData);
-}
+defaults = require('./dataStore').defaults;
 
-try {
-  defaults = require('../../defaults.json');
-} catch (error1) {
-  error = error1;
-  defaults = {
-    stopLoss: 0.25,
-    poorFillTime: 93500
-  };
-  overwriteJson('../../defaults.json', defaults);
-}
+configData = require('./dataStore').configData;
 
 //: API Object
 Api = class Api {
@@ -85,6 +65,7 @@ Api = class Api {
       newLogin: false,
       configIndex: 0
     }) {
+    var error;
     args = {
       newLogin: false,
       configIndex: 0,
@@ -117,7 +98,7 @@ Api = class Api {
       newLogin: false,
       configIndex: 0
     }) {
-    var accUrl, res;
+    var accUrl, error, res;
     try {
       args = {
         newLogin: false,
@@ -152,7 +133,7 @@ Api = class Api {
           a_u: this.accountUrl,
           t_s: Date.now()
         });
-        updateJson('../../config.json', configData);
+        updateJson('yolo_config', configData);
       } else {
         this.accessToken = configData[this.configIndex].a_t;
         this.refreshToken = configData[this.configIndex].r_t;
@@ -174,7 +155,7 @@ Api = class Api {
 
   //: Get Account Info
   async getAccount() {
-    var data;
+    var data, error;
     try {
       data = (await this.getUrl(endpoints.accounts(), true));
       return data[0];
@@ -186,6 +167,7 @@ Api = class Api {
 
   //: Get Transfers
   async getTransfers() {
+    var error;
     try {
       return (await this.getUrl(endpoints.transfers(), true));
     } catch (error1) {
@@ -196,6 +178,7 @@ Api = class Api {
 
   //: Get Market Hours
   async getMarketHours(date) {
+    var error;
     try {
       return (await this.getUrl(endpoints.marketHours(date)));
     } catch (error1) {
@@ -210,7 +193,7 @@ Api = class Api {
       instrumentData: false,
       quoteData: false
     }) {
-    var data, i, instData, j, k, len, quotes, ref, ticker, tickers;
+    var data, error, i, instData, j, k, len, quotes, ref, ticker, tickers;
     try {
       args = {
         watchList: 'Default',
@@ -248,7 +231,7 @@ Api = class Api {
   async quotes(symbols, args = {
       chainData: false
     }) {
-    var data, j, len, obj;
+    var data, error, j, len, obj;
     try {
       args = {
         chainData: false,
@@ -285,7 +268,7 @@ Api = class Api {
       span: 'year',
       bounds: 'regular'
     }) {
-    var arr, data, j, len, ref, symbolData;
+    var arr, data, error, j, len, ref, symbolData;
     try {
       args = {
         interval: 'day',
@@ -313,6 +296,7 @@ Api = class Api {
 
   //: Get Instrument Data
   async chain(instrumentId) {
+    var error;
     try {
       return (await this.getUrl(endpoints.chain(instrumentId), true));
     } catch (error1) {
@@ -323,6 +307,7 @@ Api = class Api {
 
   //: Get Market Data
   async marketData(optionId) {
+    var error;
     try {
       return (await this.getUrl(endpoints.marketData(optionId)));
     } catch (error1) {
@@ -337,7 +322,7 @@ Api = class Api {
       marketData: false,
       expired: false
     }) {
-    var chainData, chainId, data, j, k, len, len1, obj, ticker;
+    var chainData, chainId, data, error, j, k, len, len1, obj, ticker;
     try {
       args = {
         optionType: 'call',
@@ -384,7 +369,7 @@ Api = class Api {
       strike: null,
       expired: false
     }) {
-    var curTime, dateNum, i, itmIndex, j, k, len, obj, options, quote, ref, strikePrice;
+    var curTime, dateNum, error, i, itmIndex, j, k, len, obj, options, quote, ref, strikePrice;
     try {
       args = {
         optionType: 'call',
@@ -468,7 +453,7 @@ Api = class Api {
       interval: 'hour',
       span: 'month'
     }) {
-    var data, option;
+    var data, error, option;
     try {
       args = {
         optionType: 'call',
@@ -496,7 +481,7 @@ Api = class Api {
       openOnly: true,
       notFilled: false
     }) {
-    var arg, breakLoop, data, j, k, key, l, leg, len, len1, len2, len3, len4, len5, len6, m, n, notFilled, o, obj, openData, options, orderData, orders, pos, q, ref, value;
+    var arg, breakLoop, data, error, j, k, key, l, leg, len, len1, len2, len3, len4, len5, len6, m, n, notFilled, o, obj, openData, options, orderData, orders, pos, q, ref, value;
     try {
       args = {
         markedData: false,
@@ -589,7 +574,7 @@ Api = class Api {
       notFilled: false,
       buyOnly: false
     }) {
-    var data, fetchOrders, j, len, notFilled, order;
+    var data, error, fetchOrders, j, len, notFilled, order;
     try {
       data;
       args = {
@@ -672,7 +657,7 @@ Api = class Api {
       positionEffect: 'open',
       legs: null
     }) {
-    var legs;
+    var error, legs;
     try {
       legs;
       args = {
@@ -724,7 +709,7 @@ Api = class Api {
 
   //: Cancel Option Order
   async cancelOptionOrder(cancelUrl) {
-    var data;
+    var data, error;
     try {
       assert(typeof cancelUrl === 'string');
       data = (await this.postUrl(cancelUrl, {}));
@@ -744,7 +729,7 @@ Api = class Api {
       order: null,
       orderId: null
     }) {
-    var data;
+    var data, error;
     try {
       data;
       args = {
@@ -793,7 +778,7 @@ Api = class Api {
 
   //: Get URL
   async getUrl(url, consume = false) {
-    var data, pages;
+    var data, error, pages;
     try {
       if (!consume) {
         return (await this.session.get({
@@ -824,6 +809,7 @@ Api = class Api {
 
   //: Post URL
   async postUrl(url, data) {
+    var error;
     try {
       return (await this.session.post({
         uri: url,
@@ -841,7 +827,7 @@ Api = class Api {
 
   //: Get Data from URL based on Condition
   async getDataFromUrl(url, conditionFunc, args) {
-    var data, hasArrayArgs, res, resKeys, results;
+    var data, error, hasArrayArgs, res, resKeys, results;
     try {
       results = {};
       resKeys;

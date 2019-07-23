@@ -1,4 +1,4 @@
-var b64Dec, b64Enc, base64, camelCase, chalk, colorPrint, detPrint, editJson, jsonFile, overwriteJson, p, path, queryStr, roundNum, sortOptions, startCase, titleCase, updateJson, utf8;
+var b64Dec, b64Enc, base64, camelCase, chalk, colorPrint, detPrint, p, path, queryStr, roundNum, sortOptions, startCase, titleCase, utf8;
 
 path = require('path');
 
@@ -13,10 +13,6 @@ p = require('print-tools-js');
 camelCase = require('lodash/camelCase');
 
 startCase = require('lodash/startCase');
-
-editJson = require('edit-json-file');
-
-jsonFile = require('jsonfile');
 
 //: Base64 Decode
 b64Dec = function(text) {
@@ -46,38 +42,6 @@ detPrint = function(text) {
   } else {
     return console.log(text);
     return true;
-  }
-};
-
-//: Update JSON File
-updateJson = function(filename, obj) {
-  var error, file, key, value;
-  try {
-    file = editJson(path.join(__dirname, filename), {
-      autosave: true
-    });
-    for (key in obj) {
-      value = obj[key];
-      file.set(key, value);
-    }
-    return true;
-  } catch (error1) {
-    error = error1;
-    throw error;
-  }
-};
-
-//: Overwrite JSON File
-overwriteJson = function(filename, obj) {
-  var error, file;
-  try {
-    file = path.join(__dirname, filename);
-    return jsonFile.writeFileSync(file, obj, {
-      spaces: 2
-    });
-  } catch (error1) {
-    error = error1;
-    throw error;
   }
 };
 
@@ -154,8 +118,6 @@ module.exports = {
   b64Dec: b64Dec,
   b64Enc: b64Enc,
   colorPrint: colorPrint,
-  updateJson: updateJson,
-  overwriteJson: overwriteJson,
   detPrint: detPrint,
   roundNum: roundNum,
   sortOptions: sortOptions

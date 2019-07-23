@@ -1,4 +1,4 @@
-var a, assert, chalk, configData, error, moment, p, presetList, presetObject, should;
+var a, assert, chalk, configData, moment, p, presetList, presetObject, should;
 
 a = require('../utils/apiMaster')({
   newLogin: true
@@ -14,15 +14,7 @@ assert = require('chai').assert;
 
 should = require('chai').should();
 
-//: Check for data file
-configData = null;
-
-try {
-  configData = require('../../config.json');
-} catch (error1) {
-  error = error1;
-  configData = [];
-}
+configData = require('../utils/dataStore').configData;
 
 //: List Preset
 presetList = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {

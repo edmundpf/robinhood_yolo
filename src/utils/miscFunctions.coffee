@@ -5,8 +5,6 @@ chalk = require 'chalk'
 p = require 'print-tools-js'
 camelCase = require 'lodash/camelCase'
 startCase = require 'lodash/startCase'
-editJson = require 'edit-json-file'
-jsonFile = require 'jsonfile'
 
 #: Base64 Decode
 
@@ -37,26 +35,6 @@ detPrint = (text) ->
 	else
 		return console.log(text)
 		return true
-
-#: Update JSON File
-
-updateJson = (filename, obj) ->
-	try
-		file = editJson(path.join(__dirname, filename), { autosave: true })
-		for key, value of obj
-			file.set(key, value)
-		return true
-	catch error
-		throw error
-
-#: Overwrite JSON File
-
-overwriteJson = (filename, obj) ->
-	try
-		file = path.join(__dirname, filename)
-		jsonFile.writeFileSync(file, obj, { spaces: 2 })
-	catch error
-		throw error
 
 #: Sort Options
 
@@ -120,8 +98,6 @@ module.exports =
 	b64Dec: b64Dec
 	b64Enc: b64Enc
 	colorPrint: colorPrint
-	updateJson: updateJson
-	overwriteJson: overwriteJson
 	detPrint: detPrint
 	roundNum: roundNum
 	sortOptions: sortOptions

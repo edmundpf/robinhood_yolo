@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 ;
-var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, error, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
+var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
   indexOf = [].indexOf;
 
+chalk = require('chalk');
+
 com = require('commander');
+
+inquirer = require('inquirer');
+
+p = require('print-tools-js');
 
 moment = require('moment');
 
@@ -19,15 +25,13 @@ b64Dec = require('./miscFunctions').b64Dec;
 
 b64Enc = require('./miscFunctions').b64Enc;
 
-updateJson = require('./miscFunctions').updateJson;
+updateJson = require('./dataStore').updateJson;
 
-overwriteJson = require('./miscFunctions').overwriteJson;
+overwriteJson = require('./dataStore').overwriteJson;
 
-inquirer = require('inquirer');
+defaults = require('./dataStore').defaults;
 
-p = require('print-tools-js');
-
-chalk = require('chalk');
+configData = require('./dataStore').configData;
 
 //: Init API
 api = require('./apiMaster')({
@@ -36,26 +40,6 @@ api = require('./apiMaster')({
   print: true
 });
 
-//: Get data files
-configData = defaults = null;
-
-try {
-  configData = require('../../config.json');
-} catch (error1) {
-  error = error1;
-  configData = [];
-}
-
-try {
-  defaults = require('../../defaults.json');
-} catch (error1) {
-  error = error1;
-  defaults = {
-    stopLoss: 0.25,
-    poorFillTime: 93500
-  };
-}
-
 //: Main Program
 main = function() {
   var keys;
@@ -63,7 +47,7 @@ main = function() {
   keys = ['login', 'ticker', 'url', 'id', 'expiry', 'option_type', 'strike_type', 'quantity', 'price', 'depth', 'range', 'command'];
   //: Options
   return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]').action(async function() {
-    var c, j, k, key, len, len1, ref, results;
+    var c, error, j, k, key, len, len1, ref, results;
     try {
       if (com.login_index == null) {
         com.login_index = 0;
@@ -215,7 +199,7 @@ showAccountsCom = function(com) {
 
 //: Add Account Commmand
 addAccountCom = async function(com) {
-  var answer, newConfig;
+  var answer, error, newConfig;
   p.success('This will add a new account to the config.');
   try {
     answer = (await inquirer.prompt([
@@ -247,7 +231,7 @@ addAccountCom = async function(com) {
       t_s: 0
     };
     configData.push(newConfig);
-    updateJson('../../config.json', configData);
+    updateJson('yolo_config', configData);
     return p.success(`${answer.username} added successfully.`);
   } catch (error1) {
     error = error1;
@@ -257,7 +241,7 @@ addAccountCom = async function(com) {
 
 //: Edit Account Command
 editAccountCom = async function(com) {
-  var acc, account, accounts, answer, j, len, newConfig;
+  var acc, account, accounts, answer, error, j, len, newConfig;
   p.success('This will edit account details in the config.');
   try {
     accounts = [];
@@ -309,7 +293,7 @@ editAccountCom = async function(com) {
 
 //: Delete Account Command
 deleteAccountCom = async function(com) {
-  var acc, account, accounts, j, len;
+  var acc, account, accounts, error, j, len;
   p.success('This will delete an account from the config.');
   try {
     accounts = [];
@@ -328,7 +312,7 @@ deleteAccountCom = async function(com) {
         }
       ]));
       configData.splice(accounts.indexOf(acc.account), 1);
-      overwriteJson('../../config.json', configData);
+      overwriteJson('yolo_config', configData);
       return p.success(`${acc.account} deleted successfully.`);
     } else {
       return p.error("Config has no accounts.");
@@ -342,7 +326,7 @@ deleteAccountCom = async function(com) {
 
 //: Edit Settings Command
 editSettingsCom = async function(com) {
-  var answer, key;
+  var answer, error, key;
   p.success('This will edit settings.');
   try {
     answer = (await inquirer.prompt([
@@ -366,7 +350,7 @@ editSettingsCom = async function(com) {
     for (key in answer) {
       defaults[key] = answer[key];
     }
-    updateJson('../../defaults.json', defaults);
+    updateJson('yolo_defaults', defaults);
     return p.success('Settings updated successfully.');
   } catch (error1) {
     error = error1;
@@ -470,7 +454,7 @@ posWatchCom = async function(com) {
     orderData: true
   }));
   return setInterval(async() => {
-    var ask_count, ask_price, bid_count, bid_price, cur_time, delta, expiry, j, len, option_type, pos, posDet, posLog, posText, posUrl, pos_market, pos_quote, price, quote, spyLog, spyPrice, spy_quote, strike, symbol, theta, volatility, volume;
+    var ask_count, ask_price, bid_count, bid_price, cur_time, delta, error, expiry, j, len, option_type, pos, posDet, posLog, posText, posUrl, pos_market, pos_quote, price, quote, spyLog, spyPrice, spy_quote, strike, symbol, theta, volatility, volume;
     try {
       cur_time = Number(moment().format('HHmmss'));
       spy_quote = (await api.quotes('SPY'));
@@ -549,7 +533,7 @@ stopLossWatch = async function(com, placeOrder = false) {
     }
   }
   return setInterval(async() => {
-    var bid_price, buy_price, cur_pos, current_price, expiry, high, id, j, len, openPos, option_type, pos, posDet, posLog, posText, positions, sell_args, soldPosition, stop_loss, strike, symbol;
+    var bid_price, buy_price, cur_pos, current_price, error, expiry, high, id, j, len, openPos, option_type, pos, posDet, posLog, posText, positions, sell_args, soldPosition, stop_loss, strike, symbol;
     try {
       positions = (await api.optionsPositions({
         marketData: true

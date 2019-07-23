@@ -1,6 +1,9 @@
 `#!/usr/bin/env node
 `
+chalk = require 'chalk'
 com = require('commander')
+inquirer = require('inquirer')
+p = require 'print-tools-js'
 moment = require('moment')
 term = require('terminal-kit').terminal
 ON_DEATH = require('death')
@@ -8,11 +11,10 @@ roundNum = require('./miscFunctions').roundNum
 colorPrint = require('./miscFunctions').colorPrint
 b64Dec = require('./miscFunctions').b64Dec
 b64Enc = require('./miscFunctions').b64Enc
-updateJson = require('./miscFunctions').updateJson
-overwriteJson = require('./miscFunctions').overwriteJson
-inquirer = require('inquirer')
-p = require 'print-tools-js'
-chalk = require 'chalk'
+updateJson = require('./dataStore').updateJson
+overwriteJson = require('./dataStore').overwriteJson
+defaults = require('./dataStore').defaults
+configData = require('./dataStore').configData
 
 #: Init API
 
@@ -21,20 +23,6 @@ api = require('./apiMaster')(
 	configIndex: 0
 	print: true
 )
-
-#: Get data files
-
-configData = defaults = null
-try
-	configData = require '../../config.json'
-catch error
-	configData = []
-try
-	defaults = require '../../defaults.json'
-catch error
-	defaults =
-		stopLoss: 0.25
-		poorFillTime: 93500
 
 #: Main Program
 
@@ -261,7 +249,7 @@ addAccountCom = (com) ->
 			t_s: 0
 		configData.push(newConfig)
 		updateJson(
-			'../../config.json',
+			'yolo_config',
 			configData
 		)
 		p.success("#{answer.username} added successfully.")
@@ -352,7 +340,7 @@ deleteAccountCom = (com) ->
 
 			configData.splice(accounts.indexOf(acc.account), 1)
 			overwriteJson(
-				'../../config.json',
+				'yolo_config',
 				configData
 			)
 			p.success("#{acc.account} deleted successfully.")
@@ -390,7 +378,7 @@ editSettingsCom = (com) ->
 		for key of answer
 			defaults[key] = answer[key]
 		updateJson(
-			'../../defaults.json'
+			'yolo_defaults'
 			defaults
 		)
 		p.success('Settings updated successfully.')

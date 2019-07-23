@@ -4,14 +4,7 @@ chalk = require 'chalk'
 moment = require 'moment'
 assert = require('chai').assert
 should = require('chai').should()
-
-#: Check for data file
-
-configData = null
-try
-	configData = require '../../config.json'
-catch error
-	configData = []
+configData = require('../utils/dataStore').configData
 
 #: List Preset
 
