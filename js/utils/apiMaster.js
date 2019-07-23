@@ -799,7 +799,7 @@ Api = class Api {
       }
     } catch (error1) {
       error = error1;
-      if (error.code === 'ETIMEDOUT') {
+      if ((error.cause != null) && error.cause.code === 'ETIMEDOUT') {
         return this.getUrl(url, consume);
       } else {
         throw error;

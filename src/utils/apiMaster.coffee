@@ -585,7 +585,7 @@ class Api
 					pages.push(...data.results)
 				return pages
 		catch error
-			if error.code == 'ETIMEDOUT'
+			if error.cause? && error.cause.code == 'ETIMEDOUT'
 				return this.getUrl(url, consume)
 			else
 				throw error
