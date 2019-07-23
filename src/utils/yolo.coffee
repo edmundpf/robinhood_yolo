@@ -59,7 +59,7 @@ main = ->
 		.option('-p, --price <price>', 'Add option price', parsePrice)
 		.option('-d, --depth <depth>', 'Add option depth', parseInt)
 		.option('-r, --range <range>', 'Add option range', parseInt)
-		.option('-c, --command <command>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
+		.option('-c, --command <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
 			'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]')
 		.action(() ->
 
@@ -69,7 +69,7 @@ main = ->
 
 				if !com.login_index?
 					com.login_index = 0
-				if configData.length > 0 && !com.command.includes('account') && !['edit_settings'].includes(com.command)
+				if configData.length > 0 && com.command_name? && !com.command_name.includes('account') && !['edit_settings'].includes(com.command_name)
 					await api.login(configIndex: com.login_index)
 
 				#: List-type options parsing
@@ -80,10 +80,11 @@ main = ->
 
 				#: Commands
 
-				if com.command?
-					if !Array.isArray(com.command)
-						com.command = [com.command]
-					for c in com.command
+				if com.command_name?
+					console.log(com.command_name)
+					if !Array.isArray(com.command_name)
+						com.command_name = [com.command_name]
+					for c in com.command_name
 
 						#: Dashboard
 
@@ -168,6 +169,8 @@ main = ->
 
 						else if c == 'replace'
 							replaceCom(com)
+				else
+					console.log(com.helpInformation())
 
 			catch error
 				throw error
