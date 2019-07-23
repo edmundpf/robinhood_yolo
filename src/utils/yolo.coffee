@@ -59,7 +59,7 @@ main = ->
 		.option('-p, --price <price>', 'Add option price', parsePrice)
 		.option('-d, --depth <depth>', 'Add option depth', parseInt)
 		.option('-r, --range <range>', 'Add option range', parseInt)
-		.option('-c, --command <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
+		.option('-c, --command_name <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
 			'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]')
 		.action(() ->
 
@@ -81,7 +81,6 @@ main = ->
 				#: Commands
 
 				if com.command_name?
-					console.log(com.command_name)
 					if !Array.isArray(com.command_name)
 						com.command_name = [com.command_name]
 					for c in com.command_name
@@ -352,7 +351,6 @@ deleteAccountCom = (com) ->
 
 	catch error
 		p.error('Could not delete account.')
-		console.log(error)
 
 #: Edit Settings Command
 
