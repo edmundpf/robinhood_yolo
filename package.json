@@ -1,7 +1,7 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.2.1",
-  "description": "Package: robinhood_yolo",
+  "version": "0.2.2",
+  "description": "NodeJS API wrapper for Robinhood Options trading and CLI to trade from your terminal",
   "main": "./js/index.js",
   "files": [
     "/js"
@@ -19,6 +19,18 @@
     "type": "git",
     "url": "https://github.com/edmundpf/robinhood_yolo"
   },
+	"keywords": [
+		"robinhood",
+		"trading",
+		"options",
+		"stocks",
+		"finance",
+		"nyse",
+		"api",
+		"algo",
+		"trade",
+		"algorithmic"
+	],
   "license": "MIT",
   "dependencies": {
     "base-64": "^0.1.0",
