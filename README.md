@@ -7,8 +7,12 @@
 ## Install
 * To use the CLI
 	* `npm i -g robinhood-yolo`
+	* Updating
+		* `npm i -g robinhood-yolo@latest`
 * To use the API in your project
 	* `npm i -S robinhood-yolo`
+	* Updating
+		* `npm i -S robinhood-yolo@latest`
 ## CLI Usage
 ``` bash
 $ yolo -h
