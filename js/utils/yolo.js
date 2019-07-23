@@ -29,9 +29,9 @@ dataStore = require('./dataStore')({
   initData: true
 });
 
-updateJson = dataStore.updateJson;
+updateJson = dataStore.updateJson.bind(dataStore);
 
-overwriteJson = dataStore.overwriteJson;
+overwriteJson = dataStore.overwriteJson.bind(dataStore);
 
 defaults = dataStore.defaults;
 

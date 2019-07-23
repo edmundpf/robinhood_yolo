@@ -12,8 +12,8 @@ colorPrint = require('./miscFunctions').colorPrint
 b64Dec = require('./miscFunctions').b64Dec
 b64Enc = require('./miscFunctions').b64Enc
 dataStore = require('./dataStore')({ initData: true })
-updateJson = dataStore.updateJson
-overwriteJson = dataStore.overwriteJson
+updateJson = dataStore.updateJson.bind(dataStore)
+overwriteJson = dataStore.overwriteJson.bind(dataStore)
 defaults = dataStore.defaults
 configData = dataStore.configData
 
