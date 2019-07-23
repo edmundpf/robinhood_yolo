@@ -4,7 +4,6 @@ chalk = require 'chalk'
 moment = require 'moment'
 assert = require('chai').assert
 should = require('chai').should()
-configData = require('../utils/dataStore')({ initData: true }).configData
 
 #: List Preset
 
@@ -32,7 +31,7 @@ presetObject = (func, key, arg1, arg2, arg3, arg4, arg5, arg6) ->
 	it 'Key exists', ->
 		assert.equal(data[key]?, true)
 
-if configData.length > 0
+if a.configData.u_n?
 
 	#: Test Constructor
 

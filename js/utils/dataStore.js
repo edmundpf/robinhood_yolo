@@ -21,10 +21,9 @@ Database = class Database {
       initData: false,
       ...args
     };
-    if (!args.initData) {
-      this.configData = dataDefaults.configData;
-      this.defaults = dataDefaults.defaults;
-    } else {
+    this.configData = dataDefaults.configData;
+    this.defaults = dataDefaults.defaults;
+    if (args.initData) {
       this.getDataFiles();
     }
   }
