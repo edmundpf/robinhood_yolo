@@ -27,7 +27,7 @@ class Database
 			this.configData = require(this.getDataPath('yolo_config'))
 		catch error
 			this.initDatabase()
-			overwriteJson(
+			this.overwriteJson(
 				'yolo_config',
 				this.configData
 			)
@@ -35,7 +35,7 @@ class Database
 			this.defaults = require(this.getDataPath('yolo_defaults'))
 		catch error
 			this.initDatabase()
-			overwriteJson(
+			this.overwriteJson(
 				'yolo_defaults',
 				this.defaults
 			)

@@ -37,14 +37,14 @@ Database = class Database {
     } catch (error1) {
       error = error1;
       this.initDatabase();
-      overwriteJson('yolo_config', this.configData);
+      this.overwriteJson('yolo_config', this.configData);
     }
     try {
       return this.defaults = require(this.getDataPath('yolo_defaults'));
     } catch (error1) {
       error = error1;
       this.initDatabase();
-      return overwriteJson('yolo_defaults', this.defaults);
+      return this.overwriteJson('yolo_defaults', this.defaults);
     }
   }
 
