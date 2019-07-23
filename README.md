@@ -23,7 +23,7 @@ $ yolo -h
 	$ yolo -c add_account
 	```
 	* Requires username, password, and device token
-		* To retrieve device token, log into a browser and run the following command
+		* To retrieve device token, log into Robinhood in a browser and run the following command
 			``` javascript
 			x=document.getElementsByTagName('script');for(i of x){y=i.innerText.match(/(?<=clientId: ").[^"]+/);if(y!=null){console.log(y[0])}}
 			```
