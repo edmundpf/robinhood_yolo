@@ -285,7 +285,7 @@ editAccountCom = async function(com) {
       p_w: b64Enc(answer.password)
     };
     configData[accounts.indexOf(acc.account)] = {...configData[accounts.indexOf(acc.account)], ...newConfig};
-    updateJson('../../config.json', configData);
+    updateJson('yolo_config', configData);
     return p.success(`${answer.username} edited successfully.`);
   } catch (error1) {
     error = error1;

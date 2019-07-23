@@ -310,7 +310,7 @@ editAccountCom = (com) ->
 			...newConfig
 		}
 		updateJson(
-			'../../config.json',
+			'yolo_config',
 			configData
 		)
 		p.success("#{answer.username} edited successfully.")
