@@ -1,4 +1,4 @@
-var a, assert, chalk, moment, p, presetList, presetObject, should;
+var a, assert, chalk, dataStore, moment, p, presetList, presetObject, should;
 
 a = require('../utils/apiMaster')({
   newLogin: true
@@ -13,6 +13,10 @@ moment = require('moment');
 assert = require('chai').assert;
 
 should = require('chai').should();
+
+dataStore = require('../utils/dataStore')({
+  initData: true
+});
 
 //: List Preset
 presetList = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
@@ -46,7 +50,7 @@ presetObject = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
   });
 };
 
-if (a.configData.u_n != null) {
+if (dataStore.configData.length > 0) {
   //: Test Constructor
   describe('constructor()', function() {
     before(async function() {
