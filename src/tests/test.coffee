@@ -4,7 +4,7 @@ chalk = require 'chalk'
 moment = require 'moment'
 assert = require('chai').assert
 should = require('chai').should()
-configData = require('../utils/dataStore').configData
+configData = require('../utils/dataStore')({ initData: true }).configData
 
 #: List Preset
 

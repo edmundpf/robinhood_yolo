@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 ;
-var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
+var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dataStore, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
   indexOf = [].indexOf;
 
 chalk = require('chalk');
@@ -25,13 +25,17 @@ b64Dec = require('./miscFunctions').b64Dec;
 
 b64Enc = require('./miscFunctions').b64Enc;
 
-updateJson = require('./dataStore').updateJson;
+dataStore = require('./dataStore')({
+  initData: true
+});
 
-overwriteJson = require('./dataStore').overwriteJson;
+updateJson = dataStore.updateJson;
 
-defaults = require('./dataStore').defaults;
+overwriteJson = dataStore.overwriteJson;
 
-configData = require('./dataStore').configData;
+defaults = dataStore.defaults;
+
+configData = dataStore.configData;
 
 //: Init API
 api = require('./apiMaster')({

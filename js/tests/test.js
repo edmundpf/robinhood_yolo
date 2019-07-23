@@ -14,7 +14,9 @@ assert = require('chai').assert;
 
 should = require('chai').should();
 
-configData = require('../utils/dataStore').configData;
+configData = require('../utils/dataStore')({
+  initData: true
+}).configData;
 
 //: List Preset
 presetList = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {

@@ -5,63 +5,86 @@ jsonFile = require 'jsonfile'
 editJson = require 'edit-json-file'
 dataDefaults = require('../data/dataDefaults.json')
 
-#: Get Data Path
+class Database
 
-getDataPath = (filename) ->
-	return path.resolve("#{os.homedir()}/node_json_db/#{filename}.json")
+	#: Constructor
 
-#: Update JSON File
+	constructor: (args={ initData: false }) ->
+		args = {
+			initData: false
+			...args
+		}
+		if !args.initData
+			this.configData = dataDefaults.configData
+			this.defaults = dataDefaults.defaults
+		else
+			this.getDataFiles()
 
-updateJson = (filename, obj) ->
-	try
-		file = editJson(getDataPath(filename), { autosave: true })
-		for key, value of obj
-			file.set(key, value)
-		return true
-	catch error
-		throw error
+	#: Get Data Files
 
-#: Overwrite JSON File
+	getDataFiles: ->
+		try
+			this.configData = require(this.getDataPath('yolo_config'))
+		catch error
+			this.initDatabase()
+			overwriteJson(
+				'yolo_config',
+				this.configData
+			)
+		try
+			this.defaults = require(this.getDataPath('yolo_defaults'))
+		catch error
+			this.initDatabase()
+			overwriteJson(
+				'yolo_defaults',
+				this.defaults
+			)
 
-overwriteJson = (filename, obj) ->
-	try
-		file = getDataPath(filename)
-		jsonFile.writeFileSync(file, obj, { spaces: 2 })
-	catch error
-		throw error
+	#: Create Database Directory
 
-#: Init Data Files
+	initDatabase: ->
+		homeDir = "#{os.homedir()}/node_json_db"
+		if !fs.existsSync(homeDir)
+			fs.mkdirSync(homeDir)
 
-configData = defaults = null
-try
-	configData = require(getDataPath('yolo_config'))
-catch error
-	configData = dataDefaults.configData
-	homeDir = "#{os.homedir()}/node_json_db"
-	if !fs.existsSync(homeDir)
-		fs.mkdirSync(homeDir)
-	overwriteJson(
-		'yolo_config',
-		configData
-	)
-try
-	defaults = require(getDataPath('yolo_defaults'))
-catch error
-	defaults = dataDefaults.defaults
-	homeDir = "#{os.homedir()}/node_json_db"
-	if !fs.existsSync(homeDir)
-		fs.mkdirSync(homeDir)
-	overwriteJson(
-		'yolo_defaults',
-		defaults
+	#: Get Data Path
+
+	getDataPath: (filename) ->
+		return path.resolve("#{os.homedir()}/node_json_db/#{filename}.json")
+
+	#: Update JSON File
+
+	updateJson: (filename, obj) ->
+		try
+			file = editJson(this.getDataPath(filename), { autosave: true })
+			for key, value of obj
+				file.set(key, value)
+			return true
+		catch error
+			throw error
+
+	#: Overwrite JSON File
+
+	overwriteJson: (filename, obj) ->
+		try
+			file = this.getDataPath(filename)
+			jsonFile.writeFileSync(file, obj, { spaces: 2 })
+		catch error
+			throw error
+
+#: New Database Object
+
+newDataObj = (args={ initData: false }) ->
+	args = {
+		initData: false
+		...args
+	}
+	return new Database(
+		initData: args.initData
 	)
 
 #: Exports
 
-module.exports =
-	configData: configData
-	defaults: defaults
-	updateJson: updateJson
-	overwriteJson: overwriteJson
+module.exports = newDataObj
 
 #::: End Program :::

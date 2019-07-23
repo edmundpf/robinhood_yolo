@@ -1,4 +1,4 @@
-var Api, assert, b64Dec, configData, defaults, detPrint, endpoints, newApiObj, p, request, roundNum, sleep, sortOptions, updateJson, uuid;
+var Api, assert, b64Dec, dataStore, detPrint, endpoints, newApiObj, p, request, roundNum, sleep, sortOptions, uuid;
 
 p = require('print-tools-js');
 
@@ -18,11 +18,7 @@ roundNum = require('./miscFunctions').roundNum;
 
 sortOptions = require('./miscFunctions').sortOptions;
 
-updateJson = require('./dataStore').updateJson;
-
-defaults = require('./dataStore').defaults;
-
-configData = require('./dataStore').configData;
+dataStore = require('./dataStore')();
 
 //: API Object
 Api = class Api {
@@ -30,11 +26,13 @@ Api = class Api {
   constructor(args = {
       newLogin: false,
       configIndex: 0,
+      configData: null,
       print: false
     }) {
     args = {
       newLogin: false,
       configIndex: 0,
+      configData: null,
       print: false,
       ...args
     };
@@ -58,6 +56,13 @@ Api = class Api {
     this.configIndex = args.configIndex;
     this.newLogin = args.newLogin;
     this.print = args.print;
+    if (args.configData != null) {
+      this.configData = args.configData;
+      this.externalConfig = true;
+    } else {
+      dataStore.getDataFiles();
+      this.externalConfig = false;
+    }
   }
 
   //: Login Flow
@@ -105,15 +110,19 @@ Api = class Api {
         configIndex: 0,
         ...args
       };
+      if (this.configData == null) {
+        this.configData = dataStore.configData[this.configIndex];
+        this.externalConfig = false;
+      }
       this.configIndex = args.configIndex;
-      this.username = b64Dec(configData[this.configIndex].u_n);
-      if ((Date.now() > configData[this.configIndex].t_s + 86400000) || args.newLogin) {
+      this.username = b64Dec(this.configData.u_n);
+      if ((Date.now() > this.configData.t_s + 86400000) || args.newLogin) {
         res = (await this.postUrl(endpoints.login(), {
           grant_type: 'password',
           client_id: this.clientId,
-          device_token: b64Dec(configData[this.configIndex].d_t),
+          device_token: b64Dec(this.configData.d_t),
           username: this.username,
-          password: b64Dec(configData[this.configIndex].p_w)
+          password: b64Dec(this.configData.p_w)
         }));
         this.accessToken = res.access_token;
         this.refreshToken = res.refresh_token;
@@ -124,21 +133,27 @@ Api = class Api {
             Authorization: this.authToken
           }
         });
-        accUrl = (await this.getAccount());
-        this.accountUrl = accUrl.url;
-        Object.assign(configData[this.configIndex], {
+        if ((this.configData.a_u != null) || this.configData.a_u === '' || args.newLogin) {
+          accUrl = (await this.getAccount());
+          this.accountUrl = accUrl.url;
+        } else {
+          this.accountUrl = this.configData.a_u;
+        }
+        Object.assign(this.configData, {
           a_t: this.accessToken,
           r_t: this.refreshToken,
           a_b: this.authToken,
           a_u: this.accountUrl,
           t_s: Date.now()
         });
-        updateJson('yolo_config', configData);
+        if (!this.externalConfig) {
+          dataStore.updateJson('yolo_config', this.configData);
+        }
       } else {
-        this.accessToken = configData[this.configIndex].a_t;
-        this.refreshToken = configData[this.configIndex].r_t;
-        this.authToken = configData[this.configIndex].a_b;
-        this.accountUrl = configData[this.configIndex].a_u;
+        this.accessToken = this.configData.a_t;
+        this.refreshToken = this.configData.r_t;
+        this.authToken = this.configData.a_b;
+        this.accountUrl = this.configData.a_u;
         this.session = this.session.defaults({
           headers: {
             ...this.headers,
@@ -146,7 +161,11 @@ Api = class Api {
           }
         });
       }
-      return true;
+      if (!this.externalConfig) {
+        return true;
+      } else {
+        return this.configData;
+      }
     } catch (error1) {
       error = error1;
       throw error;
@@ -687,14 +706,18 @@ Api = class Api {
       }
       try {
         if (option === 'null' && args.direction === 'credit' && legs[0].side === 'sell') {
-          p.warning('Will sleep before placing sell order...');
+          if (this.print) {
+            p.warning('Will sleep before placing sell order...');
+          }
           await sleep(1000);
         }
         return (await this.placeOrderFlow(quantity, price, args, legs));
       } catch (error1) {
         error = error1;
         if (error.statusCode === 400 && (error.error != null) && (error.error.detail != null) && error.error.detail.includes('order is invalid')) {
-          p.error('Could not place sell order, will sleep and try again...');
+          if (this.print) {
+            p.error('Could not place sell order, will sleep and try again...');
+          }
           await sleep(1000);
           return (await this.placeOrderFlow(quantity, price, args, legs));
         } else {
@@ -869,11 +892,13 @@ sleep = function(time) {
 newApiObj = function(args = {
     newLogin: false,
     configIndex: 0,
+    configData: null,
     print: false
   }) {
   args = {
     newLogin: false,
     configIndex: 0,
+    configData: null,
     print: false,
     ...args
   };

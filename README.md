@@ -129,17 +129,42 @@ $ yolo -h
 		```
 ## API Usage
 ``` javascript
+// Uses CLI local data, account(s) need to be added via CLI before first use then credentials persist
 api = require('robinhood-yolo')()
+// You can also manage your own data elsewhere and the API will not automatically persist data as follows
+api = require('robinhood-yolo')({
+	configData: {
+		d_t: 'BASE64_ENCODED_DEVICE_TOKEN_HERE',
+		u_n: 'BASE64_ENCODED_PASSWORD_HERE',
+		p_w: 'BASE64_ENCODED_USERNAME_HERE',
+		a_t: 'ROBINHOOD_ACCESS_TOKEN_HERE',
+		r_t: 'ROBINHOOD_REFRESH_TOKEN_HERE',
+		a_b: 'ROBINHOOD_BEARER_TOKEN_HERE',
+		t_s: 'ROBINHOOD_LOGIN_TIMESTAMP_HERE'
+	}
+})
 ```
 * Initialization
 	``` javascript
-	api = require('robinhood-yolo')({ newLogin: true, configIndex: 0, print: true })
+	api = require('robinhood-yolo')({ newLogin: true, configIndex: 0, configData: null, print: true })
 	```
 	* Optional args
 		* newLogin (boolean)
 			* if true does new login request, else uses stored auth token for quicker login
 		* configIndex (int)
-			* user index in config file (for multi-user use)
+			* user index in config file (for multi-user use, does not apply if configData is defined)
+		* configData (object)
+			* By default CLI stores account data with no dependencies, allowing users to login with no credentials after adding the account details 
+			* If configData arg is null or undefined, credentials will need to be added before using API with `yolo -c add_account`
+			* Else, configData expects object for login data as follows
+				* d_t: Device token (Base64 encoded)
+				* u_n: Username (Base64 encoded)
+				* p_w: Password (Base64 encoded)
+				* a_t: Robinhood access token
+				* r_t: Robinhood refresh token
+				* a_b: Robinhood bearer token
+				* t_s: Login timestamp
+	* Returns true if configData is null/undefined, else returns configData object with updated values
 		* print (boolean)
 			* If false, will skip optional print statements in functions, else will print all info
 * *login()*

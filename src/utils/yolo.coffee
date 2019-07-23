@@ -11,10 +11,11 @@ roundNum = require('./miscFunctions').roundNum
 colorPrint = require('./miscFunctions').colorPrint
 b64Dec = require('./miscFunctions').b64Dec
 b64Enc = require('./miscFunctions').b64Enc
-updateJson = require('./dataStore').updateJson
-overwriteJson = require('./dataStore').overwriteJson
-defaults = require('./dataStore').defaults
-configData = require('./dataStore').configData
+dataStore = require('./dataStore')({ initData: true })
+updateJson = dataStore.updateJson
+overwriteJson = dataStore.overwriteJson
+defaults = dataStore.defaults
+configData = dataStore.configData
 
 #: Init API
 
