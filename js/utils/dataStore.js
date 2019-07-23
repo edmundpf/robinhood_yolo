@@ -1,6 +1,8 @@
-var configData, dataDefaults, defaults, editJson, error, fs, getDataPath, jsonFile, overwriteJson, path, updateJson;
+var configData, dataDefaults, defaults, editJson, error, fs, getDataPath, homeDir, jsonFile, os, overwriteJson, path, updateJson;
 
 fs = require('fs');
+
+os = require('os');
 
 path = require('path');
 
@@ -12,7 +14,7 @@ dataDefaults = require('../data/dataDefaults.json');
 
 //: Get Data Path
 getDataPath = function(filename) {
-  return `/node_json_db/${filename}.json`;
+  return path.resolve(`${os.homedir()}/node_json_db/${filename}.json`);
 };
 
 //: Update JSON File
@@ -51,23 +53,25 @@ overwriteJson = function(filename, obj) {
 configData = defaults = null;
 
 try {
-  configData = require('/node_json_db/yolo_config.json');
+  configData = require(getDataPath('yolo_config'));
 } catch (error1) {
   error = error1;
   configData = dataDefaults.configData;
-  if (!fs.existsSync('/node_json_db')) {
-    fs.mkdirSync('/node_json_db');
+  homeDir = `${os.homedir()}/node_json_db`;
+  if (!fs.existsSync(homeDir)) {
+    fs.mkdirSync(homeDir);
   }
   overwriteJson('yolo_config', configData);
 }
 
 try {
-  defaults = require('/node_json_db/yolo_defaults.json');
+  defaults = require(getDataPath('yolo_defaults'));
 } catch (error1) {
   error = error1;
   defaults = dataDefaults.defaults;
-  if (!fs.existsSync('/node_json_db')) {
-    fs.mkdirSync('/node_json_db');
+  homeDir = `${os.homedir()}/node_json_db`;
+  if (!fs.existsSync(homeDir)) {
+    fs.mkdirSync(homeDir);
   }
   overwriteJson('yolo_defaults', defaults);
 }
