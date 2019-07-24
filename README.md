@@ -224,15 +224,13 @@ api = require('robinhood-yolo')({
 * *historicals()*
 	``` javascript
 	await api.historicals('TSLA')
-	await api.historicals('TSLA', { interval: 'day', span: 'year', bounds: 'regular' })
+	await api.historicals('TSLA', { span: 'year', bounds: 'regular' })
 	```		
 	* Gets historical quotes for single ticker or list of tickers
 	* Returns dict for single ticker, list for list of tickers
 	* Required args
 		* ticker(s) (string || array)
 	* Optional args
-		* interval (string)
-			* time interval (see src/endpoints.coffee for allowed interval/span combinations)
 		* span	(string)
 			* time span (see src/endpoints.coffee for allowed interval/span combinations)
 		* bounds (string)
@@ -281,7 +279,7 @@ api = require('robinhood-yolo')({
 * *findOptionsHistoricals()*
 	``` javascript
 	await api.findOptionsHistoricals('TSLA', '2019-07-19')
-	await api.findOptionsHistoricals('TSLA', '2019-07-19', { optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, interval: 'hour', span: 'month' })
+	await api.findOptionsHistoricals('TSLA', '2019-07-19', { optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, span: 'month' })
 	```	
 	* Finds option historical data
 	* Returns list of data
@@ -299,8 +297,6 @@ api = require('robinhood-yolo')({
 			* if not null, will return option at exact strike price
 		* expired (boolean)
 			* if true includes expired options in search, else excludes expired options
-		* interval (string)
-			* time interval (see src/endpoints.coffee for allowed interval/span combinations)
 		* span	(string)
 			* time span (see src/endpoints.coffee for allowed interval/span combinations)
 * *optionsPositions()*

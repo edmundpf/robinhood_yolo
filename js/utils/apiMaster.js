@@ -284,19 +284,17 @@ Api = class Api {
 
   //: Get Historicals
   async historicals(symbols, args = {
-      interval: 'day',
-      span: 'year',
+      span: 'month',
       bounds: 'regular'
     }) {
     var arr, data, error, j, len, ref, symbolData;
     try {
       args = {
-        interval: 'day',
-        span: 'year',
+        span: 'month',
         bounds: 'regular',
         ...args
       };
-      data = (await this.getUrl(endpoints.historicals(symbols, args.interval, args.span, args.bounds)));
+      data = (await this.getUrl(endpoints.historicals(symbols, args.span, args.bounds)));
       if (!Array.isArray(symbols)) {
         return data.results[0].historicals;
       } else {
@@ -470,7 +468,6 @@ Api = class Api {
       strikeDepth: 0,
       strike: null,
       expired: true,
-      interval: 'hour',
       span: 'month'
     }) {
     var data, error, option;
@@ -486,7 +483,7 @@ Api = class Api {
         ...args
       };
       option = (await this.findOptions(symbol, expirationDate, args));
-      data = (await this.getUrl(endpoints.optionsHistoricals(option.url, args.interval, args.span), true));
+      data = (await this.getUrl(endpoints.optionsHistoricals(option.url, args.span), true));
       return data[0].data_points;
     } catch (error1) {
       error = error1;
