@@ -3,5 +3,36 @@
 	"defaults": {
 		"stopLoss": 0.25,
 		"poorFillTime": 93500
+	},
+	"apiSettings": {
+		"alphaVantage": ""
+	},
+	"indicators": {
+		"bollingerBands": {
+			"include": true,
+			"args": {
+				"period": 14,
+				"stdDev": 2
+			}
+		},
+		"rsi": {
+			"include": true,
+			"args": {
+				"period": 14
+			}
+		},
+		"vwap": {
+			"include": true
+		},
+		"macd": {
+			"include": true,
+			"args": {
+				"fastPeriod": 5,
+				"slowPeriod": 8,
+				"signalPeriod": 3,
+				"SimpleMAOscillator": false,
+				"SimpleMASignal": false
+			}
+		}
 	}
 }

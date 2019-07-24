@@ -16,6 +16,7 @@ class Database
 		}
 		this.configData = dataDefaults.configData
 		this.defaults = dataDefaults.defaults
+		this.apiSettings = dataDefaults.apiSettings
 		if args.initData
 			this.getDataFiles()
 
@@ -25,6 +26,7 @@ class Database
 		dataFiles =
 			'yolo_config': 'configData'
 			'yolo_defaults': 'defaults'
+			'yolo_apis': 'apiSettings'
 		for file, key of dataFiles
 			try
 				this[key] = require(this.getDataPath(file))

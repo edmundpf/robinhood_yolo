@@ -23,6 +23,7 @@ Database = class Database {
     };
     this.configData = dataDefaults.configData;
     this.defaults = dataDefaults.defaults;
+    this.apiSettings = dataDefaults.apiSettings;
     if (args.initData) {
       this.getDataFiles();
     }
@@ -33,7 +34,8 @@ Database = class Database {
     var dataFiles, error, file, key, results;
     dataFiles = {
       'yolo_config': 'configData',
-      'yolo_defaults': 'defaults'
+      'yolo_defaults': 'defaults',
+      'yolo_apis': 'apiSettings'
     };
     results = [];
     for (file in dataFiles) {
