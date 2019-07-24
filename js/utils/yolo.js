@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 ;
-var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dataStore, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
+var ON_DEATH, addAccountCom, api, apiSettings, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dataStore, dayTrades, defaults, deleteAccountCom, editAccountCom, editApisCom, editSettingsCom, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, showApisCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
   indexOf = [].indexOf;
 
 chalk = require('chalk');
@@ -37,6 +37,8 @@ defaults = dataStore.defaults;
 
 configData = dataStore.configData;
 
+apiSettings = dataStore.apiSettings;
+
 //: Init API
 api = require('./apiMaster')({
   newLogin: false,
@@ -50,13 +52,14 @@ main = function() {
   //: Option Keys
   keys = ['login', 'ticker', 'url', 'id', 'expiry', 'option_type', 'strike_type', 'quantity', 'price', 'depth', 'range', 'command'];
   //: Options
-  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command_name <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]').action(async function() {
-    var c, error, j, k, key, len, len1, ref, results;
+  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command_name <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, edit_apis, show_apis, trades, watch, stop_loss, stop_loss_sim, quote, position, find, ' + 'buy, sell, cancel, replace]').action(async function() {
+    var c, error, j, k, key, len, len1, nonLoginCommands, ref, results;
     try {
+      nonLoginCommands = ['show_accounts', 'add_account', 'edit_account', 'delete_account', 'edit_settings', 'edit_apis', 'show_apis'];
       if (com.login_index == null) {
         com.login_index = 0;
       }
-      if (configData.length > 0 && (com.command_name != null) && !com.command_name.includes('account') && !['edit_settings'].includes(com.command_name)) {
+      if (configData.length > 0 && (com.command_name != null) && !nonLoginCommands.includes(com.command_name)) {
         await api.login({
           configIndex: com.login_index
         });
@@ -95,6 +98,12 @@ main = function() {
           //: Edit Settings
           } else if (c === 'edit_settings') {
             results.push(editSettingsCom(com));
+          //: Edit Apis
+          } else if (c === 'edit_apis') {
+            results.push(editApisCom(com));
+          //: Show Apis
+          } else if (c === 'show_apis') {
+            results.push(showApisCom(com));
           //: Trades
           } else if (c === 'trades') {
             results.push(tradeCom(com));
@@ -361,6 +370,48 @@ editSettingsCom = async function(com) {
     error = error1;
     return p.error('Could not edit settings.');
   }
+};
+
+//: Edit Apis Command
+editApisCom = async function(com) {
+  var answer, error;
+  p.success('This will edit API settings.');
+  try {
+    //: Get Api
+    api = (await inquirer.prompt([
+      {
+        type: 'rawlist',
+        name: 'name',
+        message: 'Which API would you like to edit?',
+        choices: Object.keys(apiSettings)
+      }
+    ]));
+    //: Edit API
+    answer = (await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'api_key',
+        message: 'Enter API key:'
+      }
+    ]));
+    apiSettings[api.name] = answer.api_key;
+    updateJson('yolo_apis', apiSettings);
+    return p.success(`${answer.api_key} API key edited successfully.`);
+  } catch (error1) {
+    error = error1;
+    return p.error('Could not edit API settings.');
+  }
+};
+
+//: Show Apis Command
+showApisCom = function(com) {
+  var key, results, value;
+  results = [];
+  for (key in apiSettings) {
+    value = apiSettings[key];
+    results.push(p.chevron(`${key}: ${value}`));
+  }
+  return results;
 };
 
 //: Trades Command

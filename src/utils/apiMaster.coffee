@@ -36,7 +36,7 @@ class Api
 			jar: true
 			gzip: true
 			json: true
-			timeout: 2000
+			timeout: 5000
 			headers: this.headers
 		)
 		this.configIndex = args.configIndex
@@ -606,7 +606,7 @@ class Api
 				return pages
 		catch error
 			if error.cause? && error.cause.code == 'ETIMEDOUT'
-				return this.getUrl(url, consume)
+				return await this.getUrl(url, consume)
 			else
 				throw error
 

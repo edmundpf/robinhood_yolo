@@ -3,5 +3,8 @@
 	"defaults": {
 		"stopLoss": 0.25,
 		"poorFillTime": 93500
+	},
+	"apiSettings": {
+		"quandl": ""
 	}
 }

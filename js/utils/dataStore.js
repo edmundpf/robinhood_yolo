@@ -23,6 +23,7 @@ Database = class Database {
     };
     this.configData = dataDefaults.configData;
     this.defaults = dataDefaults.defaults;
+    this.apiSettings = dataDefaults.apiSettings;
     if (args.initData) {
       this.getDataFiles();
     }
@@ -30,21 +31,24 @@ Database = class Database {
 
   //: Get Data Files
   getDataFiles() {
-    var error;
-    try {
-      this.configData = require(this.getDataPath('yolo_config'));
-    } catch (error1) {
-      error = error1;
-      this.initDatabase();
-      this.overwriteJson('yolo_config', this.configData);
+    var dataFiles, error, file, key, results;
+    dataFiles = {
+      'yolo_config': 'configData',
+      'yolo_defaults': 'defaults',
+      'yolo_apis': 'apiSettings'
+    };
+    results = [];
+    for (file in dataFiles) {
+      key = dataFiles[file];
+      try {
+        results.push(this[key] = require(this.getDataPath(file)));
+      } catch (error1) {
+        error = error1;
+        this.initDatabase();
+        results.push(this.overwriteJson(file, this[key]));
+      }
     }
-    try {
-      return this.defaults = require(this.getDataPath('yolo_defaults'));
-    } catch (error1) {
-      error = error1;
-      this.initDatabase();
-      return this.overwriteJson('yolo_defaults', this.defaults);
-    }
+    return results;
   }
 
   //: Create Database Directory

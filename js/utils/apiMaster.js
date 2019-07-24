@@ -50,7 +50,7 @@ Api = class Api {
       jar: true,
       gzip: true,
       json: true,
-      timeout: 2000,
+      timeout: 5000,
       headers: this.headers
     });
     this.configIndex = args.configIndex;
@@ -823,7 +823,7 @@ Api = class Api {
     } catch (error1) {
       error = error1;
       if ((error.cause != null) && error.cause.code === 'ETIMEDOUT') {
-        return this.getUrl(url, consume);
+        return (await this.getUrl(url, consume));
       } else {
         throw error;
       }

@@ -16,6 +16,7 @@ updateJson = dataStore.updateJson.bind(dataStore)
 overwriteJson = dataStore.overwriteJson.bind(dataStore)
 defaults = dataStore.defaults
 configData = dataStore.configData
+apiSettings = dataStore.apiSettings
 
 #: Init API
 
@@ -61,16 +62,20 @@ main = ->
 		.option('-d, --depth <depth>', 'Add option depth', parseInt)
 		.option('-r, --range <range>', 'Add option range', parseInt)
 		.option('-c, --command_name <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
-			'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]')
+			'delete_account, edit_settings, edit_apis, show_apis, trades, watch, stop_loss, stop_loss_sim, quote, position, find, ' +
+			'buy, sell, cancel, replace]')
 		.action(() ->
 
 			try
+
+				nonLoginCommands = ['show_accounts', 'add_account', 'edit_account', 'delete_account',
+					'edit_settings', 'edit_apis', 'show_apis']
 
 				#: User Login Index
 
 				if !com.login_index?
 					com.login_index = 0
-				if configData.length > 0 && com.command_name? && !com.command_name.includes('account') && !['edit_settings'].includes(com.command_name)
+				if configData.length > 0 && com.command_name? && !nonLoginCommands.includes(com.command_name)
 					await api.login(configIndex: com.login_index)
 
 				#: List-type options parsing
@@ -115,6 +120,16 @@ main = ->
 
 						else if c == 'edit_settings'
 							editSettingsCom(com)
+
+						#: Edit Apis
+
+						else if c == 'edit_apis'
+							editApisCom(com)
+
+						#: Show Apis
+
+						else if c == 'show_apis'
+							showApisCom(com)
 
 						#: Trades
 						else if c == 'trades'
@@ -386,6 +401,51 @@ editSettingsCom = (com) ->
 		p.success('Settings updated successfully.')
 	catch error
 		p.error('Could not edit settings.')
+
+#: Edit Apis Command
+
+editApisCom = (com) ->
+
+	p.success('This will edit API settings.')
+
+	try
+
+		#: Get Api
+
+		api = await inquirer.prompt([
+				type: 'rawlist'
+				name: 'name'
+				message: 'Which API would you like to edit?'
+				choices: Object.keys(apiSettings)
+		])
+
+		#: Edit API
+
+		answer = await inquirer.prompt([
+			{
+				type: 'input'
+				name: 'api_key'
+				message: 'Enter API key:'
+			}
+		])
+
+		apiSettings[api.name] = answer.api_key
+
+		updateJson(
+			'yolo_apis',
+			apiSettings
+		)
+		p.success("#{answer.api_key} API key edited successfully.")
+
+	catch error
+		p.error('Could not edit API settings.')
+
+#: Show Apis Command
+
+showApisCom = (com) ->
+
+	for key, value of apiSettings
+		p.chevron("#{key}: #{value}")
 
 #: Trades Command
 

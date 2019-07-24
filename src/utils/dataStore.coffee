@@ -16,28 +16,26 @@ class Database
 		}
 		this.configData = dataDefaults.configData
 		this.defaults = dataDefaults.defaults
+		this.apiSettings = dataDefaults.apiSettings
 		if args.initData
 			this.getDataFiles()
 
 	#: Get Data Files
 
 	getDataFiles: ->
-		try
-			this.configData = require(this.getDataPath('yolo_config'))
-		catch error
-			this.initDatabase()
-			this.overwriteJson(
-				'yolo_config',
-				this.configData
-			)
-		try
-			this.defaults = require(this.getDataPath('yolo_defaults'))
-		catch error
-			this.initDatabase()
-			this.overwriteJson(
-				'yolo_defaults',
-				this.defaults
-			)
+		dataFiles =
+			'yolo_config': 'configData'
+			'yolo_defaults': 'defaults'
+			'yolo_apis': 'apiSettings'
+		for file, key of dataFiles
+			try
+				this[key] = require(this.getDataPath(file))
+			catch error
+				this.initDatabase()
+				this.overwriteJson(
+					file,
+					this[key]
+				)
 
 	#: Create Database Directory
 
