@@ -50,7 +50,7 @@ Api = class Api {
       jar: true,
       gzip: true,
       json: true,
-      timeout: 2000,
+      timeout: 3000,
       headers: this.headers
     });
     this.configIndex = args.configIndex;
@@ -110,11 +110,11 @@ Api = class Api {
         configIndex: 0,
         ...args
       };
+      this.configIndex = args.configIndex;
       if (this.configData == null) {
         this.configData = dataStore.configData[this.configIndex];
         this.externalConfig = false;
       }
-      this.configIndex = args.configIndex;
       this.username = b64Dec(this.configData.u_n);
       if ((Date.now() > this.configData.t_s + 86400000) || args.newLogin) {
         res = (await this.postUrl(endpoints.login(), {
@@ -146,8 +146,9 @@ Api = class Api {
           a_u: this.accountUrl,
           t_s: Date.now()
         });
+        dataStore.configData[this.configIndex] = this.configData;
         if (!this.externalConfig) {
-          dataStore.updateJson('yolo_config', this.configData);
+          dataStore.updateJson('yolo_config', dataStore.configData);
         }
       } else {
         this.accessToken = this.configData.a_t;
@@ -823,7 +824,7 @@ Api = class Api {
     } catch (error1) {
       error = error1;
       if ((error.cause != null) && error.cause.code === 'ETIMEDOUT') {
-        return this.getUrl(url, consume);
+        return (await this.getUrl(url, consume));
       } else {
         throw error;
       }
@@ -905,6 +906,7 @@ newApiObj = function(args = {
   return new Api({
     newLogin: args.newLogin,
     configIndex: args.configIndex,
+    configData: args.configData,
     print: args.print
   });
 };

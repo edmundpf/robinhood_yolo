@@ -208,11 +208,13 @@ if dataStore.configData.length > 0
 		)
 		it 'Returns array', ->
 			data.should.be.a('array')
-		if data? && data.length != 0
-			it 'Key exists', ->
+		it 'Key exists', ->
+			if data? && data.length != 0
+				p.success("Has open positions, testing.")
 				assert.equal(data[0]['market_data']?, true)
-		else
-			p.warning(chalk'No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.')
+			else
+				p.warning(chalk'No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.')
+				this.skip()
 
 	#: Test Options Orders for all orders
 
@@ -234,11 +236,13 @@ if dataStore.configData.length > 0
 		)
 		it 'Returns array', ->
 			data.should.be.a('array')
-		if data? && data.length != 0
-			it 'Key exists', ->
+		it 'Key exists', ->
+			if data? && data.length > 0
+				p.success("Has unfilled orders, testing.")
 				assert.equal(data[0]['legs']?, true)
-		else
-			p.warning(chalk'No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.')
+			else
+				p.warning(chalk'No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.')
+				this.skip()
 
 	#: Test Options Orders for single order
 
@@ -252,14 +256,13 @@ if dataStore.configData.length > 0
 	#: Test Placing Options orders, replacing, and canceling
 
 	describe 'Placing Orders', ->
-		data = buy = replace = cancel = null
-		closedMarkets = false
+		curTime = new Date()
+		buy = replace = cancel = null
+		dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
 		before(() ->
 			this.timeout(15000)
-			curTime = new Date()
-			dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
 			if dateNum > 160100
-				closedMarkets = true
+				p.success("Markets are closed (#{dateNum}), will test placing orders.")
 				data = await a.findOptions(
 					'TSLA',
 					'2021-01-15',
@@ -268,21 +271,21 @@ if dataStore.configData.length > 0
 				buy = await a.placeOptionOrder(data.url, 1, 0.01)
 				replace = await a.replaceOptionOrder(1, 0.02, { orderId: buy.id })
 				cancel = await a.cancelOptionOrder(replace.cancel_url)
+			else
+				p.warning(chalk"Markets are open (#{dateNum}), will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.")
+				this.skip()
 		)
-		if closedMarkets
-			p.success('Markets are closed, will test placing orders.')
-			it 'Buy returns object', ->
-				buy.should.be.a('object')
-			it 'Buy key exists', ->
-				assert.equal(buy.id?, true)
-			it 'Replace returns object', ->
-				replace.should.be.a('object')
-			it 'Replace key exists', ->
-				assert.equal(replace.id?, true)
-			it 'Cancel returns true', ->
-				assert.equal(cancel, true)
-		else
-			p.warning(chalk'Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.')
+
+		it 'Buy returns object', ->
+			buy.should.be.a('object')
+		it 'Buy key exists', ->
+			assert.equal(buy.id?, true)
+		it 'Replace returns object', ->
+			replace.should.be.a('object')
+		it 'Replace key exists', ->
+			assert.equal(replace.id?, true)
+		it 'Cancel returns true', ->
+			assert.equal(cancel, true)
 
 else
 	p.error('No accounts in config file. Exiting.')

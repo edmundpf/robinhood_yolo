@@ -176,13 +176,15 @@ if (dataStore.configData.length > 0) {
     it('Returns array', function() {
       return data.should.be.a('array');
     });
-    if ((data != null) && data.length !== 0) {
-      return it('Key exists', function() {
+    return it('Key exists', function() {
+      if ((data != null) && data.length !== 0) {
+        p.success("Has open positions, testing.");
         return assert.equal(data[0]['market_data'] != null, true);
-      });
-    } else {
-      return p.warning(chalk`No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.`);
-    }
+      } else {
+        p.warning(chalk`No open positions, skipping {cyan optionsPositions() - open only} - {magenta Key exists}.`);
+        return this.skip();
+      }
+    });
   });
   //: Test Options Orders for all orders
   describe('optionsOrders() - all', function() {
@@ -201,13 +203,15 @@ if (dataStore.configData.length > 0) {
     it('Returns array', function() {
       return data.should.be.a('array');
     });
-    if ((data != null) && data.length !== 0) {
-      return it('Key exists', function() {
+    return it('Key exists', function() {
+      if ((data != null) && data.length > 0) {
+        p.success("Has unfilled orders, testing.");
         return assert.equal(data[0]['legs'] != null, true);
-      });
-    } else {
-      return p.warning(chalk`No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.`);
-    }
+      } else {
+        p.warning(chalk`No unfilled orders, skipping {cyan optionsOrders() - not filled} - {magenta Key exists}.`);
+        return this.skip();
+      }
+    });
   });
   //: Test Options Orders for single order
   describe('optionsOrders() - single', function() {
@@ -217,16 +221,15 @@ if (dataStore.configData.length > 0) {
   });
   //: Test Placing Options orders, replacing, and canceling
   describe('Placing Orders', function() {
-    var buy, cancel, closedMarkets, data, replace;
-    data = buy = replace = cancel = null;
-    closedMarkets = false;
+    var buy, cancel, curTime, dateNum, replace;
+    curTime = new Date();
+    buy = replace = cancel = null;
+    dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds();
     before(async function() {
-      var curTime, dateNum;
+      var data;
       this.timeout(15000);
-      curTime = new Date();
-      dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds();
       if (dateNum > 160100) {
-        closedMarkets = true;
+        p.success(`Markets are closed (${dateNum}), will test placing orders.`);
         data = (await a.findOptions('TSLA', '2021-01-15', {
           strikeDepth: 3
         }));
@@ -235,28 +238,26 @@ if (dataStore.configData.length > 0) {
           orderId: buy.id
         }));
         return cancel = (await a.cancelOptionOrder(replace.cancel_url));
+      } else {
+        p.warning(chalk`Markets are open (${dateNum}), will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.`);
+        return this.skip();
       }
     });
-    if (closedMarkets) {
-      p.success('Markets are closed, will test placing orders.');
-      it('Buy returns object', function() {
-        return buy.should.be.a('object');
-      });
-      it('Buy key exists', function() {
-        return assert.equal(buy.id != null, true);
-      });
-      it('Replace returns object', function() {
-        return replace.should.be.a('object');
-      });
-      it('Replace key exists', function() {
-        return assert.equal(replace.id != null, true);
-      });
-      return it('Cancel returns true', function() {
-        return assert.equal(cancel, true);
-      });
-    } else {
-      return p.warning(chalk`Markets are open, will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.`);
-    }
+    it('Buy returns object', function() {
+      return buy.should.be.a('object');
+    });
+    it('Buy key exists', function() {
+      return assert.equal(buy.id != null, true);
+    });
+    it('Replace returns object', function() {
+      return replace.should.be.a('object');
+    });
+    it('Replace key exists', function() {
+      return assert.equal(replace.id != null, true);
+    });
+    return it('Cancel returns true', function() {
+      return assert.equal(cancel, true);
+    });
   });
 } else {
   p.error('No accounts in config file. Exiting.');

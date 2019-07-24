@@ -36,7 +36,7 @@ class Api
 			jar: true
 			gzip: true
 			json: true
-			timeout: 2000
+			timeout: 3000
 			headers: this.headers
 		)
 		this.configIndex = args.configIndex
@@ -83,10 +83,10 @@ class Api
 				...args
 			}
 
+			this.configIndex = args.configIndex
 			if !this.configData?
 				this.configData = dataStore.configData[this.configIndex]
 				this.externalConfig = false
-			this.configIndex = args.configIndex
 			this.username = b64Dec(this.configData.u_n)
 
 			if (Date.now() > this.configData.t_s + 86400000) || args.newLogin
@@ -120,10 +120,11 @@ class Api
 					a_u: this.accountUrl
 					t_s: Date.now()
 				)
+				dataStore.configData[this.configIndex] = this.configData
 				if !this.externalConfig
 					dataStore.updateJson(
 						'yolo_config',
-						this.configData
+						dataStore.configData
 					)
 
 			else
@@ -606,7 +607,7 @@ class Api
 				return pages
 		catch error
 			if error.cause? && error.cause.code == 'ETIMEDOUT'
-				return this.getUrl(url, consume)
+				return await this.getUrl(url, consume)
 			else
 				throw error
 
@@ -671,6 +672,7 @@ newApiObj = (args={ newLogin: false, configIndex: 0, configData: null, print: fa
 	return new Api(
 		newLogin: args.newLogin
 		configIndex: args.configIndex
+		configData: args.configData
 		print: args.print
 	)
 
