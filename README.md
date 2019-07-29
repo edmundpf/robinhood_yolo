@@ -376,4 +376,4 @@ api = require('robinhood-yolo')({
 * To contribute, please submit a pull request!
 * If making changes to the API, run `npm run test` and confirm all tests are working
 * Include tests for new methods in src/tests/test.coffee
-* **NOTE:** If the method actually buys or sells anything, please add test logic to ensure testing is only allowed **AFTER** market close, do not allow tests before market open to ensure a queued order isn't accidentally filled. Please also ensure that the test ammounts are ridiculous bids/asks that could not possibly be filled anyways, I.E. a deep-itm AMZN option for $0.01.
+* **NOTE:** If the method actually buys or sells anything, please add test logic to ensure testing is only allowed **AFTER** market close, do not allow tests before market open to ensure a queued order isn't accidentally filled. Please also ensure that the test amounts are ridiculous bids/asks that could not possibly be filled anyways, I.E. a deep-itm AMZN option for $0.01.
