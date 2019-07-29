@@ -164,9 +164,9 @@ api = require('robinhood-yolo')({
 				* r_t: Robinhood refresh token
 				* a_b: Robinhood bearer token
 				* t_s: Login timestamp
-	* Returns true if configData is null/undefined, else returns configData object with updated values
 		* print (boolean)
 			* If false, will skip optional print statements in functions, else will print all info
+	* Returns true if configData is null/undefined, else returns configData object with updated values
 * *login()*
 	``` javascript
 	await api.login({ newLogin: true, configIndex: 0 })
