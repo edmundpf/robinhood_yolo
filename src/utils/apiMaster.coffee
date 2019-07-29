@@ -36,7 +36,7 @@ class Api
 			jar: true
 			gzip: true
 			json: true
-			timeout: 5000
+			timeout: 3000
 			headers: this.headers
 		)
 		this.configIndex = args.configIndex
@@ -83,10 +83,10 @@ class Api
 				...args
 			}
 
+			this.configIndex = args.configIndex
 			if !this.configData?
 				this.configData = dataStore.configData[this.configIndex]
 				this.externalConfig = false
-			this.configIndex = args.configIndex
 			this.username = b64Dec(this.configData.u_n)
 
 			if (Date.now() > this.configData.t_s + 86400000) || args.newLogin
@@ -120,10 +120,11 @@ class Api
 					a_u: this.accountUrl
 					t_s: Date.now()
 				)
+				dataStore.configData[this.configIndex] = this.configData
 				if !this.externalConfig
 					dataStore.updateJson(
 						'yolo_config',
-						this.configData
+						dataStore.configData
 					)
 
 			else
@@ -222,15 +223,14 @@ class Api
 
 	#: Get Historicals
 
-	historicals: (symbols, args={ interval: 'day', span: 'year', bounds: 'regular' }) ->
+	historicals: (symbols, args={ span: 'month', bounds: 'regular' }) ->
 		try
 			args = {
-				interval: 'day'
-				span: 'year'
+				span: 'month'
 				bounds: 'regular'
 				...args
 			}
-			data = await this.getUrl(endpoints.historicals(symbols, args.interval, args.span, args.bounds))
+			data = await this.getUrl(endpoints.historicals(symbols, args.span, args.bounds))
 			if !Array.isArray(symbols)
 				return data.results[0].historicals
 			else
@@ -346,7 +346,7 @@ class Api
 
 	#: Get Options Historicals
 
-	findOptionHistoricals: (symbol, expirationDate, args={ optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, interval: 'hour', span: 'month' }) ->
+	findOptionHistoricals: (symbol, expirationDate, args={ optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, span: 'month' }) ->
 		try
 			args = {
 				optionType: 'call'
@@ -359,7 +359,7 @@ class Api
 				...args
 			}
 			option = await this.findOptions(symbol, expirationDate, args)
-			data = await this.getUrl(endpoints.optionsHistoricals(option.url, args.interval, args.span), true)
+			data = await this.getUrl(endpoints.optionsHistoricals(option.url, args.span), true)
 			return data[0].data_points
 		catch error
 			throw error
@@ -671,6 +671,7 @@ newApiObj = (args={ newLogin: false, configIndex: 0, configData: null, print: fa
 	return new Api(
 		newLogin: args.newLogin
 		configIndex: args.configIndex
+		configData: args.configData
 		print: args.print
 	)
 

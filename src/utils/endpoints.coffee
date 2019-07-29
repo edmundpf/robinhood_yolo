@@ -5,9 +5,20 @@ queryStr = require('./miscFunctions').queryStr
 
 api = 'https://api.robinhood.com'
 
+#: Appropriate span/interval combos
+
+intervals =
+	'day': '5minute'
+	'week': '10minute'
+	'month': 'hour'
+	'year': 'day'
+	'5year': 'week'
+
 #: Endpoints Object
 
 endpoints =
+
+	#: Api prefix
 
 	api: (path) ->
 		return "#{api}#{path}"
@@ -58,12 +69,12 @@ endpoints =
 	# 	regular, extended
 	###
 
-	historicals: (symbols, interval='day', span='year', bounds='regular') ->
+	historicals: (symbols, span='year', bounds='regular') ->
 		if Array.isArray(symbols)
 			symbols = symbols.join(',')
 		query = queryStr(
 			symbols: symbols
-			interval: interval
+			interval: intervals[span]
 			span: span
 			bound: bounds
 		)
@@ -71,12 +82,12 @@ endpoints =
 
 	#: Get Historical Quotes for options chains
 
-	optionsHistoricals: (instruments, interval='day', span='year') ->
+	optionsHistoricals: (instruments, span='year') ->
 		if Array.isArray(instruments)
 			instruments = instruments.join(',')
 		query = queryStr(
 			instruments: instruments
-			interval: interval
+			interval: intervals[span]
 			span: span
 		)
 		return "#{api}/marketdata/options/historicals/#{query}"

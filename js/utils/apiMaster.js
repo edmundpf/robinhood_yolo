@@ -50,7 +50,7 @@ Api = class Api {
       jar: true,
       gzip: true,
       json: true,
-      timeout: 5000,
+      timeout: 3000,
       headers: this.headers
     });
     this.configIndex = args.configIndex;
@@ -110,11 +110,11 @@ Api = class Api {
         configIndex: 0,
         ...args
       };
+      this.configIndex = args.configIndex;
       if (this.configData == null) {
         this.configData = dataStore.configData[this.configIndex];
         this.externalConfig = false;
       }
-      this.configIndex = args.configIndex;
       this.username = b64Dec(this.configData.u_n);
       if ((Date.now() > this.configData.t_s + 86400000) || args.newLogin) {
         res = (await this.postUrl(endpoints.login(), {
@@ -146,8 +146,9 @@ Api = class Api {
           a_u: this.accountUrl,
           t_s: Date.now()
         });
+        dataStore.configData[this.configIndex] = this.configData;
         if (!this.externalConfig) {
-          dataStore.updateJson('yolo_config', this.configData);
+          dataStore.updateJson('yolo_config', dataStore.configData);
         }
       } else {
         this.accessToken = this.configData.a_t;
@@ -283,19 +284,17 @@ Api = class Api {
 
   //: Get Historicals
   async historicals(symbols, args = {
-      interval: 'day',
-      span: 'year',
+      span: 'month',
       bounds: 'regular'
     }) {
     var arr, data, error, j, len, ref, symbolData;
     try {
       args = {
-        interval: 'day',
-        span: 'year',
+        span: 'month',
         bounds: 'regular',
         ...args
       };
-      data = (await this.getUrl(endpoints.historicals(symbols, args.interval, args.span, args.bounds)));
+      data = (await this.getUrl(endpoints.historicals(symbols, args.span, args.bounds)));
       if (!Array.isArray(symbols)) {
         return data.results[0].historicals;
       } else {
@@ -469,7 +468,6 @@ Api = class Api {
       strikeDepth: 0,
       strike: null,
       expired: true,
-      interval: 'hour',
       span: 'month'
     }) {
     var data, error, option;
@@ -485,7 +483,7 @@ Api = class Api {
         ...args
       };
       option = (await this.findOptions(symbol, expirationDate, args));
-      data = (await this.getUrl(endpoints.optionsHistoricals(option.url, args.interval, args.span), true));
+      data = (await this.getUrl(endpoints.optionsHistoricals(option.url, args.span), true));
       return data[0].data_points;
     } catch (error1) {
       error = error1;
@@ -905,6 +903,7 @@ newApiObj = function(args = {
   return new Api({
     newLogin: args.newLogin,
     configIndex: args.configIndex,
+    configData: args.configData,
     print: args.print
   });
 };

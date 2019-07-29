@@ -164,9 +164,9 @@ api = require('robinhood-yolo')({
 				* r_t: Robinhood refresh token
 				* a_b: Robinhood bearer token
 				* t_s: Login timestamp
-	* Returns true if configData is null/undefined, else returns configData object with updated values
 		* print (boolean)
 			* If false, will skip optional print statements in functions, else will print all info
+	* Returns true if configData is null/undefined, else returns configData object with updated values
 * *login()*
 	``` javascript
 	await api.login({ newLogin: true, configIndex: 0 })
@@ -224,15 +224,13 @@ api = require('robinhood-yolo')({
 * *historicals()*
 	``` javascript
 	await api.historicals('TSLA')
-	await api.historicals('TSLA', { interval: 'day', span: 'year', bounds: 'regular' })
+	await api.historicals('TSLA', { span: 'year', bounds: 'regular' })
 	```		
 	* Gets historical quotes for single ticker or list of tickers
 	* Returns dict for single ticker, list for list of tickers
 	* Required args
 		* ticker(s) (string || array)
 	* Optional args
-		* interval (string)
-			* time interval (see src/endpoints.coffee for allowed interval/span combinations)
 		* span	(string)
 			* time span (see src/endpoints.coffee for allowed interval/span combinations)
 		* bounds (string)
@@ -281,7 +279,7 @@ api = require('robinhood-yolo')({
 * *findOptionsHistoricals()*
 	``` javascript
 	await api.findOptionsHistoricals('TSLA', '2019-07-19')
-	await api.findOptionsHistoricals('TSLA', '2019-07-19', { optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, interval: 'hour', span: 'month' })
+	await api.findOptionsHistoricals('TSLA', '2019-07-19', { optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, span: 'month' })
 	```	
 	* Finds option historical data
 	* Returns list of data
@@ -299,8 +297,6 @@ api = require('robinhood-yolo')({
 			* if not null, will return option at exact strike price
 		* expired (boolean)
 			* if true includes expired options in search, else excludes expired options
-		* interval (string)
-			* time interval (see src/endpoints.coffee for allowed interval/span combinations)
 		* span	(string)
 			* time span (see src/endpoints.coffee for allowed interval/span combinations)
 * *optionsPositions()*
@@ -380,4 +376,4 @@ api = require('robinhood-yolo')({
 * To contribute, please submit a pull request!
 * If making changes to the API, run `npm run test` and confirm all tests are working
 * Include tests for new methods in src/tests/test.coffee
-* **NOTE:** If the method actually buys or sells anything, please add test logic to ensure testing is only allowed **AFTER** market close, do not allow tests before market open to ensure a queued order isn't accidentally filled. Please also ensure that the test ammounts are ridiculous bids/asks that could not possibly be filled anyways, I.E. a deep-itm AMZN option for $0.01.
+* **NOTE:** If the method actually buys or sells anything, please add test logic to ensure testing is only allowed **AFTER** market close, do not allow tests before market open to ensure a queued order isn't accidentally filled. Please also ensure that the test amounts are ridiculous bids/asks that could not possibly be filled anyways, I.E. a deep-itm AMZN option for $0.01.
