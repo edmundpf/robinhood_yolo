@@ -522,6 +522,7 @@ stopLossWatch = async function(com, placeOrder = false) {
   market_time = market_time.format('HHmmss');
   if (market_time < 93000 || market_time > 160000) {
     p.error('Exiting stop-loss watch, market is not currently open.');
+    return false;
   } else if (market_time >= 93000 && market_time < defaults.poorFillTime) {
     answer = (await inquirer.prompt([
       {

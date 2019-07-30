@@ -272,7 +272,7 @@ if dataStore.configData.length > 0
 				replace = await a.replaceOptionOrder(1, 0.02, { orderId: buy.id })
 				cancel = await a.cancelOptionOrder(replace.cancel_url)
 			else
-				p.warning(chalk"Markets are open (#{dateNum}), will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.")
+				p.warning(chalk"Markets are open (#{dateNum}), skipping {cyan Placing Orders} - {magenta all}.")
 				this.skip()
 		)
 
