@@ -1,14 +1,14 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "NodeJS API wrapper for Robinhood Options trading and CLI to trade from your terminal",
   "main": "./js/index.js",
   "files": [
     "/js"
   ],
   "scripts": {
-  	"test_prepare": "mv /root/node_json_db/yolo_config.json /root/node_json_db/dummy_config.json",
-  	"test_finish": "mv /root/node_json_db/dummy_config.json /root/node_json_db/yolo_config.json",
+    "test_prepare": "mv /root/node_json_db/yolo_config.json /root/node_json_db/dummy_config.json",
+    "test_finish": "mv /root/node_json_db/dummy_config.json /root/node_json_db/yolo_config.json",
     "test": "./node_modules/.bin/mocha js/tests",
     "compile": "grunt sync"
   },
@@ -21,18 +21,18 @@
     "type": "git",
     "url": "https://github.com/edmundpf/robinhood_yolo"
   },
-	"keywords": [
-		"robinhood",
-		"trading",
-		"options",
-		"stocks",
-		"finance",
-		"nyse",
-		"api",
-		"algo",
-		"trade",
-		"algorithmic"
-	],
+  "keywords": [
+    "robinhood",
+    "trading",
+    "options",
+    "stocks",
+    "finance",
+    "nyse",
+    "api",
+    "algo",
+    "trade",
+    "algorithmic"
+  ],
   "license": "MIT",
   "dependencies": {
     "base-64": "^0.1.0",
@@ -44,7 +44,7 @@
     "jsonfile": "^5.0.0",
     "lodash": "^4.17.14",
     "moment": "^2.24.0",
-    "print-tools-js": "^1.0.8",
+    "print-tools-js": "^1.1.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "terminal-kit": "^1.28.3",
