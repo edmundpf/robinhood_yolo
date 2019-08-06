@@ -239,7 +239,7 @@ if (dataStore.configData.length > 0) {
         }));
         return cancel = (await a.cancelOptionOrder(replace.cancel_url));
       } else {
-        p.warning(chalk`Markets are open (${dateNum}), will not test placing orders, skipping {cyan Placing Orders} - {magenta all}.`);
+        p.warning(chalk`Markets are open (${dateNum}), skipping {cyan Placing Orders} - {magenta all}.`);
         return this.skip();
       }
     });
