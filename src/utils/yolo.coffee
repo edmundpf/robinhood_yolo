@@ -584,7 +584,7 @@ stopLossWatch = (com, placeOrder=false) ->
 
 				if cur_pos.high < (cur_pos.price * (1 + MAX_LOSS))
 					stop_loss = roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS))
-					if bid_price <= stop_loss
+					if current_price <= stop_loss
 						posText += p.error(
 							"Stop-Loss (Max Loss) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
 							ret: true
@@ -597,7 +597,7 @@ stopLossWatch = (com, placeOrder=false) ->
 
 				else if cur_pos.high >= (cur_pos.price * (1 + MAX_LOSS))
 					stop_loss = if (cur_pos.high - (cur_pos.price * MAX_LOSS)) >= (cur_pos.price + 0.01) then roundNum(cur_pos.high - (cur_pos.price * MAX_LOSS)) else roundNum(cur_pos.price + 0.01)
-					if bid_price <= stop_loss
+					if current_price <= stop_loss
 						posText += p.error(
 							"Stop-Loss (Preserve Gains) triggered: Symbol: #{symbol} | Current Price: #{current_price} | Bid Price: #{bid_price} | Stop Loss: #{stop_loss}"
 							ret: true
