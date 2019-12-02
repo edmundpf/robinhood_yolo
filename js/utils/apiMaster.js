@@ -174,10 +174,16 @@ Api = class Api {
   }
 
   //: Get Account Info
-  async getAccount() {
+  async getAccount(args = {
+      consume: true
+    }) {
     var data, error;
     try {
-      data = (await this.getUrl(endpoints.accounts(), true));
+      args = {
+        consume: true,
+        ...args
+      };
+      data = (await this.getUrl(endpoints.accounts(), args.consume));
       return data[0];
     } catch (error1) {
       error = error1;
@@ -186,10 +192,16 @@ Api = class Api {
   }
 
   //: Get Transfers
-  async getTransfers() {
+  async getTransfers(args = {
+      consume: true
+    }) {
     var error;
     try {
-      return (await this.getUrl(endpoints.transfers(), true));
+      args = {
+        consume: true,
+        ...args
+      };
+      return (await this.getUrl(endpoints.transfers(), args.consume));
     } catch (error1) {
       error = error1;
       throw error;
@@ -211,7 +223,8 @@ Api = class Api {
   async getWatchList(args = {
       watchList: 'Default',
       instrumentData: false,
-      quoteData: false
+      quoteData: false,
+      consume: true
     }) {
     var data, error, i, instData, j, k, len, quotes, ref, ticker, tickers;
     try {
@@ -219,10 +232,11 @@ Api = class Api {
         watchList: 'Default',
         instrumentData: false,
         quoteData: false,
+        consume: true,
         ...args
       };
       tickers = [];
-      data = (await this.getUrl(endpoints.watchList(args.watchList), true));
+      data = (await this.getUrl(endpoints.watchList(args.watchList), args.consume));
       for (j = 0, len = data.length; j < len; j++) {
         ticker = data[j];
         ticker.id = ticker.instrument.match('(?<=instruments\/).[^\/]+')[0];
@@ -249,18 +263,20 @@ Api = class Api {
 
   //: Get Quotes
   async quotes(symbols, args = {
-      chainData: false
+      chainData: false,
+      consume: true
     }) {
     var data, error, j, len, obj;
     try {
       args = {
         chainData: false,
+        consume: true,
         ...args
       };
       if (!Array.isArray(symbols)) {
         data = (await this.getUrl(endpoints.quotes(symbols)));
       } else {
-        data = (await this.getUrl(endpoints.quotes(symbols), true));
+        data = (await this.getUrl(endpoints.quotes(symbols), args.consume));
       }
       if (!Array.isArray(data)) {
         data = [data];
@@ -313,10 +329,16 @@ Api = class Api {
   }
 
   //: Get Instrument Data
-  async chain(instrumentId) {
+  async chain(instrumentId, args = {
+      consume: true
+    }) {
     var error;
     try {
-      return (await this.getUrl(endpoints.chain(instrumentId), true));
+      args = {
+        consume: true,
+        ...args
+      };
+      return (await this.getUrl(endpoints.chain(instrumentId), args.consume));
     } catch (error1) {
       error = error1;
       throw error;
@@ -338,7 +360,8 @@ Api = class Api {
   async getOptions(symbol, expirationDate, args = {
       optionType: 'call',
       marketData: false,
-      expired: false
+      expired: false,
+      consume: true
     }) {
     var chainData, chainId, data, error, j, k, len, len1, obj, ticker;
     try {
@@ -346,6 +369,7 @@ Api = class Api {
         optionType: 'call',
         marketData: false,
         expired: false,
+        consume: true,
         ...args
       };
       chainId;
@@ -360,9 +384,9 @@ Api = class Api {
         }
       }
       if (!args.expired) {
-        data = (await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), true));
+        data = (await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), args.consume));
       } else {
-        data = (await this.getUrl(endpoints.expiredOptions(chainId, expirationDate, args.optionType), true));
+        data = (await this.getUrl(endpoints.expiredOptions(chainId, expirationDate, args.optionType), args.consume));
       }
       if (args.marketData) {
         for (k = 0, len1 = data.length; k < len1; k++) {
@@ -468,7 +492,8 @@ Api = class Api {
       strikeDepth: 0,
       strike: null,
       expired: true,
-      span: 'month'
+      span: 'month',
+      consume: true
     }) {
     var data, error, option;
     try {
@@ -480,10 +505,11 @@ Api = class Api {
         expired: true,
         interval: 'hour',
         span: 'month',
+        consume: true,
         ...args
       };
       option = (await this.findOptions(symbol, expirationDate, args));
-      data = (await this.getUrl(endpoints.optionsHistoricals(option.url, args.span), true));
+      data = (await this.getUrl(endpoints.optionsHistoricals(option.url, args.span), args.consume));
       return data[0].data_points;
     } catch (error1) {
       error = error1;
@@ -496,7 +522,8 @@ Api = class Api {
       marketData: false,
       orderData: false,
       openOnly: true,
-      notFilled: false
+      notFilled: false,
+      consume: true
     }) {
     var arg, breakLoop, data, error, j, k, key, l, leg, len, len1, len2, len3, len4, len5, len6, m, n, notFilled, o, obj, openData, options, orderData, orders, pos, q, ref, value;
     try {
@@ -505,9 +532,10 @@ Api = class Api {
         orderData: false,
         openOnly: true,
         notFilled: false,
+        consume: true,
         ...args
       };
-      data = (await this.getUrl(endpoints.optionsPositions(), true));
+      data = (await this.getUrl(endpoints.optionsPositions(), args.consume));
       if (args.openOnly) {
         openData = [];
         for (j = 0, len = data.length; j < len; j++) {
@@ -589,7 +617,8 @@ Api = class Api {
       urls: null,
       id: null,
       notFilled: false,
-      buyOnly: false
+      buyOnly: false,
+      consume: true
     }) {
     var data, error, fetchOrders, j, len, notFilled, order;
     try {
@@ -599,6 +628,7 @@ Api = class Api {
         id: null,
         notFilled: false,
         buyOnly: false,
+        consume: true,
         ...args
       };
       if (args.id != null) {
@@ -645,7 +675,7 @@ Api = class Api {
           mod: args.buyOnly
         }));
       } else {
-        data = (await this.getUrl(endpoints.optionsOrders(), true));
+        data = (await this.getUrl(endpoints.optionsOrders(), args.consume));
       }
       if (args.notFilled) {
         notFilled = [];

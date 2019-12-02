@@ -184,12 +184,18 @@ api = require('robinhood-yolo')({
 	```
 	* Gets account info
 	* Returns dict
+	* Optional args
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *getTransfers()*
 	``` javascript
 	await api.getTransfers()
 	```
 	* Gets account bank transfers
 	* Returns list
+	* Optional args
+			* consume (boolean)
+				* if true returns all pages of data, else returns first page of data
 * *getMarketHours()*
 	``` javascript
 	await api.getMarketHours('2019-07-19')
@@ -209,6 +215,8 @@ api = require('robinhood-yolo')({
 			* if true includes instrument data
 		* quoteData (boolean)
 			* if true includes quote data
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *quotes()*
 	``` javascript
 	await api.quotes('TSLA')
@@ -221,6 +229,8 @@ api = require('robinhood-yolo')({
 	* Optional args
 		* chainData (boolean)
 			* If false does not include chain data, else includes chain data
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *historicals()*
 	``` javascript
 	await api.historicals('TSLA')
@@ -251,6 +261,8 @@ api = require('robinhood-yolo')({
 			* If false does not include market data, otherwise includes market data
 		* expired (boolean)
 			* if true includes expired options in search, else excludes expired options
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *findOptions()*
 	``` javascript
 	await api.findOptions('TSLA', '2019-07-19')
@@ -299,6 +311,8 @@ api = require('robinhood-yolo')({
 			* if true includes expired options in search, else excludes expired options
 		* span	(string)
 			* time span (see src/endpoints.coffee for allowed interval/span combinations)
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *optionsPositions()*
 	``` javascript
 	await api.optionsPositions()
@@ -315,6 +329,8 @@ api = require('robinhood-yolo')({
 			* If true includes open positions only, if false includes all positions
 		* notFilled (boolean)
 			* If true includes unfilled positions, if false excludes unfilled positions
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *optionsOrders()*
 	``` javascript
 	await api.optionsOrders()
@@ -330,6 +346,8 @@ api = require('robinhood-yolo')({
 			* If true includes unfilled orders, if false excludes unfilled orders
 		* buyOnly (boolean)
 			* Only include buy orders if true, else include all
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *placeOptionOrder()*
 	``` javascript
 	await api.placeOptionOrder('OPTION_URL_HERE', 1.0, 0.53)

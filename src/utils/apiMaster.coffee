@@ -147,18 +147,26 @@ class Api
 
 	#: Get Account Info
 
-	getAccount: ->
+	getAccount: (args={consume: true}) ->
 		try
-			data = await this.getUrl(endpoints.accounts(), true)
+			args = {
+				consume: true
+				...args
+			}
+			data = await this.getUrl(endpoints.accounts(), args.consume)
 			return data[0]
 		catch error
 			throw error
 
 	#: Get Transfers
 
-	getTransfers: ->
+	getTransfers: (args={consume: true}) ->
 		try
-			return await this.getUrl(endpoints.transfers(), true)
+			args = {
+				consume: true
+				...args
+			}
+			return await this.getUrl(endpoints.transfers(), args.consume)
 		catch error
 			throw error
 
@@ -172,16 +180,17 @@ class Api
 
 	#: Get Watch List
 
-	getWatchList: (args={ watchList: 'Default', instrumentData: false, quoteData: false }) ->
+	getWatchList: (args={ watchList: 'Default', instrumentData: false, quoteData: false, consume: true }) ->
 		try
 			args = {
 				watchList: 'Default'
 				instrumentData: false
 				quoteData: false
+				consume: true
 				...args
 			}
 			tickers = []
-			data = await this.getUrl(endpoints.watchList(args.watchList), true)
+			data = await this.getUrl(endpoints.watchList(args.watchList), args.consume)
 			for ticker in data
 				ticker.id = ticker.instrument.match('(?<=instruments\/).[^\/]+')[0]
 				if args.instrumentData
@@ -199,16 +208,17 @@ class Api
 
 	#: Get Quotes
 
-	quotes: (symbols, args={ chainData: false }) ->
+	quotes: (symbols, args={ chainData: false, consume: true }) ->
 		try
 			args = {
 				chainData: false
+				consume: true
 				...args
 			}
 			if !Array.isArray(symbols)
 				data = await this.getUrl(endpoints.quotes(symbols))
 			else
-				data = await this.getUrl(endpoints.quotes(symbols), true)
+				data = await this.getUrl(endpoints.quotes(symbols), args.consume)
 			if !Array.isArray(data)
 				data = [data]
 			if args.chainData
@@ -243,9 +253,13 @@ class Api
 
 	#: Get Instrument Data
 
-	chain: (instrumentId) ->
+	chain: (instrumentId, args={consume: true}) ->
 		try
-			return await this.getUrl(endpoints.chain(instrumentId), true)
+			args = {
+				consume: true
+				...args
+			}
+			return await this.getUrl(endpoints.chain(instrumentId), args.consume)
 		catch error
 			throw error
 
@@ -259,12 +273,13 @@ class Api
 
 	#: Get Options
 
-	getOptions: (symbol, expirationDate, args={ optionType: 'call', marketData: false, expired: false }) ->
+	getOptions: (symbol, expirationDate, args={ optionType: 'call', marketData: false, expired: false, consume: true }) ->
 		try
 			args = {
 				optionType: 'call'
 				marketData: false
 				expired: false
+				consume: true
 				...args
 			}
 			chainId
@@ -274,9 +289,9 @@ class Api
 				if ticker.symbol == symbol
 					chainId = ticker.id
 			if !args.expired
-				data = await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), true)
+				data = await this.getUrl(endpoints.options(chainId, expirationDate, args.optionType), args.consume)
 			else
-				data = await this.getUrl(endpoints.expiredOptions(chainId, expirationDate, args.optionType), true)
+				data = await this.getUrl(endpoints.expiredOptions(chainId, expirationDate, args.optionType), args.consume)
 			if args.marketData
 				for obj in data
 					obj.market_data = await this.marketData(obj.id)
@@ -346,7 +361,7 @@ class Api
 
 	#: Get Options Historicals
 
-	findOptionHistoricals: (symbol, expirationDate, args={ optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, span: 'month' }) ->
+	findOptionHistoricals: (symbol, expirationDate, args={ optionType: 'call', strikeType: 'itm', strikeDepth: 0, strike: null, expired: true, span: 'month', consume: true }) ->
 		try
 			args = {
 				optionType: 'call'
@@ -356,26 +371,28 @@ class Api
 				expired: true
 				interval: 'hour'
 				span: 'month'
+				consume: true
 				...args
 			}
 			option = await this.findOptions(symbol, expirationDate, args)
-			data = await this.getUrl(endpoints.optionsHistoricals(option.url, args.span), true)
+			data = await this.getUrl(endpoints.optionsHistoricals(option.url, args.span), args.consume)
 			return data[0].data_points
 		catch error
 			throw error
 
 	#: Get Options Postions
 
-	optionsPositions: (args={ marketData: false, orderData: false, openOnly: true, notFilled: false }) ->
+	optionsPositions: (args={ marketData: false, orderData: false, openOnly: true, notFilled: false, consume: true }) ->
 		try
 			args = {
 				markedData: false
 				orderData: false
 				openOnly: true
 				notFilled: false
+				consume: true
 				...args
 			}
-			data = await this.getUrl(endpoints.optionsPositions(), true)
+			data = await this.getUrl(endpoints.optionsPositions(), args.consume)
 			if args.openOnly
 				openData = []
 				for pos in data
@@ -421,7 +438,7 @@ class Api
 
 	#: Get Options Orders
 
-	optionsOrders: (args={ urls: null, id: null, notFilled: false, buyOnly: false }) ->
+	optionsOrders: (args={ urls: null, id: null, notFilled: false, buyOnly: false, consume: true }) ->
 		try
 			data
 			args = {
@@ -429,6 +446,7 @@ class Api
 				id: null
 				notFilled: false
 				buyOnly: false
+				consume: true
 				...args
 			}
 			if args.id?
@@ -465,7 +483,7 @@ class Api
 			else
 				data = await this.getUrl(
 					endpoints.optionsOrders(),
-					true
+					args.consume
 				)
 			if args.notFilled
 				notFilled = []
