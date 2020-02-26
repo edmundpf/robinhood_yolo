@@ -905,6 +905,8 @@ parsePrice = function(val) {
 //: Print in Place
 printInPlace = function(text) {
   term.saveCursor();
+  process.stdout.write(' '.repeat(process.stdout.columns).repeat(text.split('\n').length));
+  term.restoreCursor();
   process.stdout.write(`${text}\r`);
   return term.restoreCursor();
 };

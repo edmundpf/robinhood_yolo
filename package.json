@@ -1,6 +1,6 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "NodeJS API wrapper for Robinhood Options trading and CLI to trade from your terminal",
   "main": "./js/index.js",
   "files": [
