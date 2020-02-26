@@ -2,7 +2,7 @@ p = require 'print-tools-js'
 uuid = require 'uuid/v4'
 assert = require 'assert'
 endpoints = require './endpoints'
-request = require 'request-promise'
+axios = require 'axios'
 b64Dec = require('./miscFunctions').b64Dec
 detPrint = require('./miscFunctions').detPrint
 roundNum = require('./miscFunctions').roundNum
@@ -32,11 +32,8 @@ class Api
 			'X-Robinhood-API-Version': '1.0.0'
 			'User-Agent': 'Robinhood/823 (iPhone; iOS 7.1.2; Scale/2.00)'
 		this.clientId = 'c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS'
-		this.session = request.defaults(
-			jar: true
-			gzip: true
-			json: true
-			timeout: 3000
+		this.session = axios.create(
+			timeout: 10000
 			headers: this.headers
 		)
 		this.configIndex = args.configIndex
@@ -101,12 +98,7 @@ class Api
 				this.accessToken = res.access_token
 				this.refreshToken = res.refresh_token
 				this.authToken = "Bearer #{this.accessToken}"
-				this.session = this.session.defaults(
-					headers: {
-						...this.headers,
-						Authorization: this.authToken
-					}
-				)
+				this.session.defaults.headers.common['Authorization'] = this.authToken
 				if this.configData.a_u? || this.configData.a_u == '' || args.newLogin
 					accUrl = await this.getAccount()
 					this.accountUrl = accUrl.url
@@ -132,12 +124,7 @@ class Api
 				this.refreshToken = this.configData.r_t
 				this.authToken = this.configData.a_b
 				this.accountUrl = this.configData.a_u
-				this.session = this.session.defaults(
-					headers: {
-						...this.headers,
-						Authorization: this.authToken
-					}
-				)
+				this.session.defaults.headers.common['Authorization'] = this.authToken
 			if !this.externalConfig
 				return true
 			else
@@ -440,7 +427,7 @@ class Api
 
 	optionsOrders: (args={ urls: null, id: null, notFilled: false, buyOnly: false, consume: true }) ->
 		try
-			data
+			data = null
 			args = {
 				urls: null
 				id: null
@@ -497,11 +484,27 @@ class Api
 		catch error
 			throw error
 
+	#: Stock Orders
+
+	stockOrders: (args={ consume: true }) ->
+		try
+			args = {
+				consume: true
+				...args
+			}
+			data = await this.getUrl(
+				endpoints.stockOrders(),
+				args.consume
+			)
+			return data
+		catch error
+			throw error
+
 	#: Place Option Order
 
 	placeOptionOrder: (option, quantity, price, args={ direction: 'debit', side: 'buy', positionEffect: 'open', legs: null }) ->
 		try
-			legs
+			legs = null
 			args = {
 				direction: 'debit'
 				side: 'buy'
@@ -526,20 +529,11 @@ class Api
 			else
 				legs = args.legs
 
-			try
-				if option == 'null' && args.direction == 'credit' && legs[0].side == 'sell'
-					if this.print
-						p.warning('Will sleep before placing sell order...')
-					await sleep(1000)
-				return await this.placeOrderFlow(quantity, price, args, legs)
-			catch error
-				if error.statusCode == 400 && error.error? && error.error.detail? && error.error.detail.includes('order is invalid')
-					if this.print
-						p.error('Could not place sell order, will sleep and try again...')
-					await sleep(1000)
-					return await this.placeOrderFlow(quantity, price, args, legs)
-				else
-					throw error
+			if option == 'null' && args.direction == 'credit' && legs[0].side == 'sell'
+				if this.print
+					p.warning('Will sleep before placing sell order...')
+				await sleep(1000)
+			return await this.placeOrderFlow(quantity, price, args, legs)
 
 		catch error
 			throw error
@@ -561,7 +555,7 @@ class Api
 
 	replaceOptionOrder: (quantity, price, args={ order: null, orderId: null }) ->
 		try
-			data
+			data = null
 			args = {
 				order: null
 				orderId: null
@@ -608,23 +602,17 @@ class Api
 	getUrl: (url, consume=false) ->
 		try
 			if !consume
-				return await this.session.get(
-					uri: url
-				)
+				return (await this.session.get(url)).data
 			else
-				data = await this.session.get(
-					uri: url
-				)
+				data = (await this.session.get(url)).data
 				pages = data.results
 				while data.next?
-					data = await this.session.get(
-						uri: data.next
-					)
+					data = (await this.session.get(data.next)).data
 					pages.push(...data.results)
 				return pages
 		catch error
-			if error.cause? && error.cause.code == 'ETIMEDOUT'
-				return await this.getUrl(url, consume)
+			if (error.response? and error.response.data?)
+				return error.response.data
 			else
 				throw error
 
@@ -632,16 +620,20 @@ class Api
 
 	postUrl: (url, data) ->
 		try
-			return await this.session.post(
-				uri: url
-				body: data
-				headers: {
-					...this.headers,
-					'Content-Type': 'application/json'
+			return (await this.session.post(
+				url,
+				data,
+				{
+					headers: {
+						'Content-Type': 'application/json'
+					}
 				}
-			)
+			)).data
 		catch error
-			throw error
+			if (error.response? and error.response.data?)
+				return error.response.data
+			else
+				throw error
 
 	#: Get Data from URL based on Condition
 
@@ -650,14 +642,10 @@ class Api
 			results = {}
 			resKeys
 			hasArrayArgs = Array.isArray(args.args)
-			data = await this.session.get(
-					uri: url
-				)
+			data = (await this.session.get(url)).data
 			results = conditionFunc(data.results, args)
 			while data.next?
-				data = await this.session.get(
-					uri: data.next
-				)
+				data = (await this.session.get(data.next)).data
 				res = conditionFunc(data.results, args)
 				results = { ...results, ...res }
 				resKeys = Object.keys(results)
@@ -667,7 +655,10 @@ class Api
 					return results[resKeys[0]]
 			return results
 		catch error
-			throw error
+			if (error.response? and error.response.data?)
+				return error.response.data
+			else
+				throw error
 
 #: Sleep
 

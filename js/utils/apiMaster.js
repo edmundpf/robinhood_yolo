@@ -1,4 +1,4 @@
-var Api, assert, b64Dec, dataStore, detPrint, endpoints, newApiObj, p, request, roundNum, sleep, sortOptions, uuid;
+var Api, assert, axios, b64Dec, dataStore, detPrint, endpoints, newApiObj, p, roundNum, sleep, sortOptions, uuid;
 
 p = require('print-tools-js');
 
@@ -8,7 +8,7 @@ assert = require('assert');
 
 endpoints = require('./endpoints');
 
-request = require('request-promise');
+axios = require('axios');
 
 b64Dec = require('./miscFunctions').b64Dec;
 
@@ -46,11 +46,8 @@ Api = class Api {
       'User-Agent': 'Robinhood/823 (iPhone; iOS 7.1.2; Scale/2.00)'
     };
     this.clientId = 'c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS';
-    this.session = request.defaults({
-      jar: true,
-      gzip: true,
-      json: true,
-      timeout: 3000,
+    this.session = axios.create({
+      timeout: 10000,
       headers: this.headers
     });
     this.configIndex = args.configIndex;
@@ -127,12 +124,7 @@ Api = class Api {
         this.accessToken = res.access_token;
         this.refreshToken = res.refresh_token;
         this.authToken = `Bearer ${this.accessToken}`;
-        this.session = this.session.defaults({
-          headers: {
-            ...this.headers,
-            Authorization: this.authToken
-          }
-        });
+        this.session.defaults.headers.common['Authorization'] = this.authToken;
         if ((this.configData.a_u != null) || this.configData.a_u === '' || args.newLogin) {
           accUrl = (await this.getAccount());
           this.accountUrl = accUrl.url;
@@ -155,12 +147,7 @@ Api = class Api {
         this.refreshToken = this.configData.r_t;
         this.authToken = this.configData.a_b;
         this.accountUrl = this.configData.a_u;
-        this.session = this.session.defaults({
-          headers: {
-            ...this.headers,
-            Authorization: this.authToken
-          }
-        });
+        this.session.defaults.headers.common['Authorization'] = this.authToken;
       }
       if (!this.externalConfig) {
         return true;
@@ -622,7 +609,7 @@ Api = class Api {
     }) {
     var data, error, fetchOrders, j, len, notFilled, order;
     try {
-      data;
+      data = null;
       args = {
         urls: null,
         id: null,
@@ -697,6 +684,24 @@ Api = class Api {
     }
   }
 
+  //: Stock Orders
+  async stockOrders(args = {
+      consume: true
+    }) {
+    var data, error;
+    try {
+      args = {
+        consume: true,
+        ...args
+      };
+      data = (await this.getUrl(endpoints.stockOrders(), args.consume));
+      return data;
+    } catch (error1) {
+      error = error1;
+      throw error;
+    }
+  }
+
   //: Place Option Order
   async placeOptionOrder(option, quantity, price, args = {
       direction: 'debit',
@@ -706,7 +711,7 @@ Api = class Api {
     }) {
     var error, legs;
     try {
-      legs;
+      legs = null;
       args = {
         direction: 'debit',
         side: 'buy',
@@ -732,26 +737,13 @@ Api = class Api {
       } else {
         legs = args.legs;
       }
-      try {
-        if (option === 'null' && args.direction === 'credit' && legs[0].side === 'sell') {
-          if (this.print) {
-            p.warning('Will sleep before placing sell order...');
-          }
-          await sleep(1000);
+      if (option === 'null' && args.direction === 'credit' && legs[0].side === 'sell') {
+        if (this.print) {
+          p.warning('Will sleep before placing sell order...');
         }
-        return (await this.placeOrderFlow(quantity, price, args, legs));
-      } catch (error1) {
-        error = error1;
-        if (error.statusCode === 400 && (error.error != null) && (error.error.detail != null) && error.error.detail.includes('order is invalid')) {
-          if (this.print) {
-            p.error('Could not place sell order, will sleep and try again...');
-          }
-          await sleep(1000);
-          return (await this.placeOrderFlow(quantity, price, args, legs));
-        } else {
-          throw error;
-        }
+        await sleep(1000);
       }
+      return (await this.placeOrderFlow(quantity, price, args, legs));
     } catch (error1) {
       error = error1;
       throw error;
@@ -782,7 +774,7 @@ Api = class Api {
     }) {
     var data, error;
     try {
-      data;
+      data = null;
       args = {
         order: null,
         orderId: null,
@@ -832,26 +824,20 @@ Api = class Api {
     var data, error, pages;
     try {
       if (!consume) {
-        return (await this.session.get({
-          uri: url
-        }));
+        return ((await this.session.get(url))).data;
       } else {
-        data = (await this.session.get({
-          uri: url
-        }));
+        data = ((await this.session.get(url))).data;
         pages = data.results;
         while (data.next != null) {
-          data = (await this.session.get({
-            uri: data.next
-          }));
+          data = ((await this.session.get(data.next))).data;
           pages.push(...data.results);
         }
         return pages;
       }
     } catch (error1) {
       error = error1;
-      if ((error.cause != null) && error.cause.code === 'ETIMEDOUT') {
-        return (await this.getUrl(url, consume));
+      if ((error.response != null) && (error.response.data != null)) {
+        return error.response.data;
       } else {
         throw error;
       }
@@ -862,17 +848,18 @@ Api = class Api {
   async postUrl(url, data) {
     var error;
     try {
-      return (await this.session.post({
-        uri: url,
-        body: data,
+      return ((await this.session.post(url, data, {
         headers: {
-          ...this.headers,
           'Content-Type': 'application/json'
         }
-      }));
+      }))).data;
     } catch (error1) {
       error = error1;
-      throw error;
+      if ((error.response != null) && (error.response.data != null)) {
+        return error.response.data;
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -883,14 +870,10 @@ Api = class Api {
       results = {};
       resKeys;
       hasArrayArgs = Array.isArray(args.args);
-      data = (await this.session.get({
-        uri: url
-      }));
+      data = ((await this.session.get(url))).data;
       results = conditionFunc(data.results, args);
       while (data.next != null) {
-        data = (await this.session.get({
-          uri: data.next
-        }));
+        data = ((await this.session.get(data.next))).data;
         res = conditionFunc(data.results, args);
         results = {...results, ...res};
         resKeys = Object.keys(results);
@@ -903,7 +886,11 @@ Api = class Api {
       return results;
     } catch (error1) {
       error = error1;
-      throw error;
+      if ((error.response != null) && (error.response.data != null)) {
+        return error.response.data;
+      } else {
+        throw error;
+      }
     }
   }
 

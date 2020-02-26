@@ -38,10 +38,6 @@ endpoints = {
   transfers: function() {
     return `${api}/ach/transfers/`;
   },
-  //: Get all orders or fetch by Order ID
-  orders: function(id) {
-    return `${api}/orders/${id}/`;
-  },
   //: Get Quotes for stock or list of stocks
   quotes: function(symbols) {
     if (Array.isArray(symbols)) {
@@ -117,6 +113,15 @@ endpoints = {
   //: Get Options Positions
   optionsPositions: function() {
     return `${api}/options/positions/`;
+  },
+  //: Get Stock Orders
+  stockOrders: function(id) {
+    if (id != null) {
+      return `${api}/orders/${id}/`;
+    } else {
+
+    }
+    return `${api}/orders/`;
   },
   //: Get Options Orders
   optionsOrders: function(id) {

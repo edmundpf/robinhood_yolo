@@ -1,6 +1,6 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "NodeJS API wrapper for Robinhood Options trading and CLI to trade from your terminal",
   "main": "./js/index.js",
   "files": [
@@ -35,18 +35,17 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.19.2",
     "base-64": "^0.1.0",
     "chalk": "^2.4.2",
     "commander": "^2.20.0",
     "death": "^1.1.0",
-    "edit-json-file": "^1.2.1",
+    "edit-json-file": "^1.4.0",
     "inquirer": "^6.5.0",
     "jsonfile": "^5.0.0",
     "lodash": "^4.17.14",
     "moment": "^2.24.0",
     "print-tools-js": "^1.1.0",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4",
     "terminal-kit": "^1.28.3",
     "utf8": "^3.0.0",
     "uuid": "^3.3.2"

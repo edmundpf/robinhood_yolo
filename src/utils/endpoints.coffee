@@ -43,11 +43,6 @@ endpoints =
 	transfers: ->
 		return "#{api}/ach/transfers/"
 
-	#: Get all orders or fetch by Order ID
-
-	orders: (id) ->
-		return "#{api}/orders/#{id}/"
-
 	#: Get Quotes for stock or list of stocks
 
 	quotes: (symbols) ->
@@ -123,6 +118,14 @@ endpoints =
 
 	optionsPositions: ->
 		return "#{api}/options/positions/"
+
+	#: Get Stock Orders
+
+	stockOrders: (id) ->
+		if id?
+			return "#{api}/orders/#{id}/"
+		else
+		return "#{api}/orders/"
 
 	#: Get Options Orders
 

@@ -78,6 +78,14 @@ if dataStore.configData.length > 0
 			'scheduled'
 		)
 
+	#: Test Stock Orders
+
+	describe 'stockOrders()', ->
+		presetList(
+			a.stockOrders,
+			'instrument'
+		)
+
 	#: Test Get Watchlist
 
 	describe 'getWatchList()', ->

@@ -87,6 +87,10 @@ if (dataStore.configData.length > 0) {
   describe('getTransfers()', function() {
     return presetList(a.getTransfers, 'scheduled');
   });
+  //: Test Stock Orders
+  describe('stockOrders()', function() {
+    return presetList(a.stockOrders, 'instrument');
+  });
   //: Test Get Watchlist
   describe('getWatchList()', function() {
     return presetList(a.getWatchList, 'quote_data', {

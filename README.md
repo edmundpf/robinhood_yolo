@@ -348,6 +348,14 @@ api = require('robinhood-yolo')({
 			* Only include buy orders if true, else include all
 		* consume (boolean)
 			* if true returns all pages of data, else returns first page of data
+* *stockOrders()*
+	``` javascript
+	await api.stockOrders()
+	```
+	* Returns list of stock orders
+	* Optional args
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *placeOptionOrder()*
 	``` javascript
 	await api.placeOptionOrder('OPTION_URL_HERE', 1.0, 0.53)
