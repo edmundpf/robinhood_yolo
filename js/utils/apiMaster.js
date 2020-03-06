@@ -357,8 +357,10 @@ Api = class Api {
         if (chainIndex >= endIndex) {
           optionIndex += 1;
           legIndex = allHistory[optionIndex].legIndex;
-          delete allHistory[optionIndex].legIndex;
           endIndex = allHistory[optionIndex + 1] != null ? allHistory[optionIndex + 1].legIndex : allHistory.length;
+        }
+        if (allHistory[optionIndex].legIndex != null) {
+          delete allHistory[optionIndex].legIndex;
         }
         allHistory[optionIndex].legs[chainIndex - legIndex] = {
           ...allHistory[optionIndex].legs[chainIndex - legIndex],

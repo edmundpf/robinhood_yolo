@@ -283,11 +283,12 @@ class Api
 			endIndex = if allHistory[optionIndex + 1]? then allHistory[optionIndex + 1].legIndex else allHistory.length
 			chainRes = await Promise.all(legChains)
 			for chainIndex of chainRes
-				if (chainIndex >= endIndex)
+				if chainIndex >= endIndex
 					optionIndex += 1
 					legIndex = allHistory[optionIndex].legIndex
-					delete allHistory[optionIndex].legIndex
 					endIndex = if allHistory[optionIndex + 1]? then allHistory[optionIndex + 1].legIndex else allHistory.length
+				if allHistory[optionIndex].legIndex?
+					delete allHistory[optionIndex].legIndex
 				allHistory[optionIndex].legs[chainIndex - legIndex] = {
 					...allHistory[optionIndex].legs[chainIndex - legIndex]
 					strike: Number(chainRes[chainIndex].strike_price)
