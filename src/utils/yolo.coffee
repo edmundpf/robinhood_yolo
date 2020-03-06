@@ -8,6 +8,7 @@ moment = require('moment')
 term = require('terminal-kit').terminal
 ON_DEATH = require('death')
 roundNum = require('./miscFunctions').roundNum
+titleCase = require('./miscFunctions').titleCase
 colorPrint = require('./miscFunctions').colorPrint
 b64Dec = require('./miscFunctions').b64Dec
 b64Enc = require('./miscFunctions').b64Enc
@@ -390,43 +391,57 @@ editSettingsCom = (com) ->
 #: Trades Command
 
 tradeCom = (com) ->
-	trades = {}
-	amt = gains = losses = wins = defeats = 0
-	p.success("Getting trade history for #{api.username}")
-	options = await api.optionsOrders()
-	for option in options
-		date = time = ''
-		if option.state != 'cancelled'
-			if option.direction == 'credit'
-				amt = Number(option.processed_premium)
-			else if option.direction == 'debit'
-				amt = if Number(option.processed_premium) != 0 then Number(option.processed_premium) * -1 else 0
-			try
-				cur_time = moment(option.legs[0].executions[0].timestamp)
-				date = cur_time.format('YYYY/MM/DD')
-				time = cur_time.format('HH:mm:ss')
-			url = option.legs[0].option
-			if !trades[url]?
-				trades[url] =
-					amt: amt
-					symbol: option.chain_symbol
-					date: date
-					time: time
-			else
-				trades[url].amt += amt
-				if trades[url].time == '' && time != ''
-					trades[url].time = time
+	actions = {}
+	defaultAction =
+		date: ''
+		desc: ''
+		color: ''
+		amt: 0
+	gains = losses = wins = defeats = 0
+	p.success("Getting account history for #{api.username}")
+	activity = await api.getHistory({ banking: false, stock: false })
+	for action in activity
+		if action.type == 'option'
+			maxExpiration = ''
+			ticker = action.ticker
+			uniqueId = ticker
+			strategy = titleCase(action.strategy)
+			desc = "#{ticker} #{strategy} "
+			strikesText = []
+			for legIndex of action.legs
+				if action.strategy.includes('spread') or action.strategy.includes('condor')
+					legExpiration = action.legs[legIndex].expiration
+					if legExpiration > maxExpiration
+						maxExpiration = legExpiration
+				else
+					maxExpiration = action.legs[legIndex].expiration
+				if Number(legIndex) == 0
+					desc += moment(maxExpiration).format('MM-DD-YYYY') + ' | '
+				strike = "#{action.legs[legIndex].strike}#{if action.legs[legIndex].type == 'call' then 'C' else 'P'}"
+				desc += "#{strike}#{if Number(legIndex) != action.legs.length - 1 then ',' else ''} "
+				strikesText.push(String(strike) + action.legs[legIndex].expiration)
 
-	for url, trade of trades
+			strikesText.sort((a, b) => if (a > b) then 1 else -1)
+			for strike in strikesText
+				uniqueId += strike
+			if action.direction == 'credit'
+				amt = action.amount
+			else
+				amt = if action.amount > 0 then action.amount * -1 else 0
+			if !actions[uniqueId]?
+				actions[uniqueId] = {
+					...defaultAction
+					date: action.date
+					desc: desc
+					amt: amt
+				}
+			else
+				if action.date > actions[uniqueId].date
+					actions[uniqueId].date = action.date
+				actions[uniqueId].amt += amt
+
+	for key, trade of actions
 		amtColor = 'green'
-		data = await api.getUrl(url)
-		Object.assign(
-			trade,
-			strikePrice: data.strike_price
-			expirationDate: data.expiration_date
-			optionType: data.type
-			expirationDate: data.expiration_date
-		)
 		if trade.amt >= 0
 			gains += trade.amt
 			wins += 1
@@ -435,7 +450,7 @@ tradeCom = (com) ->
 			losses += trade.amt
 			defeats += 1
 		amt = roundNum(trade.amt)
-		p.bullet(chalk"#{trade.symbol}-#{trade.date}-#{trade.optionType}: {#{amtColor} $#{amt}}", { log: false })
+		p.bullet(chalk"#{trade.desc}| {#{amtColor} $#{amt}}", { log: false })
 
 	net = gains + losses
 	p.chevron(chalk"{green Gains}: #{gains}", { log: false })

@@ -248,6 +248,174 @@ Api = class Api {
     }
   }
 
+  //: Get History
+  async getHistory(args = {
+      options: true,
+      stocks: true,
+      banking: true
+    }) {
+    var allHistory, allOptions, allStocks, allTransfers, chainIndex, chainRes, defaultLeg, defaultRecord, endIndex, error, execution, histRes, instIndex, instRes, instruments, j, k, l, leg, legChains, legIndex, legPrice, legQuantity, len, len1, len2, len3, len4, m, n, newOrder, optionIndex, order, ref, ref1, requests, stock, stockStartIndex, transfer, typeIndex, typeIndexes;
+    try {
+      args = {
+        options: true,
+        stocks: true,
+        banking: true,
+        consume: true,
+        ...args
+      };
+      defaultRecord = {
+        broker: 'Robinhood',
+        account: this.username,
+        type: '',
+        direction: '',
+        date: '',
+        ticker: '',
+        strategy: '',
+        amount: 0,
+        quantity: 0
+      };
+      defaultLeg = {
+        price: 0,
+        quantity: 0,
+        strike: 0,
+        type: '',
+        expiration: '',
+        side: ''
+      };
+      requests = [];
+      typeIndex = 0;
+      typeIndexes = {
+        options: -1,
+        stocks: -1,
+        transfers: -1
+      };
+      if (args.options) {
+        requests.push(this.optionsOrders());
+        typeIndexes.options = typeIndex;
+        typeIndex += 1;
+      }
+      if (args.stocks) {
+        requests.push(this.stockOrders());
+        typeIndexes.stocks = typeIndex;
+        typeIndex += 1;
+      }
+      if (args.banking) {
+        requests.push(this.getTransfers());
+        typeIndexes.transfers = typeIndex;
+        typeIndex += 1;
+      }
+      histRes = (await Promise.all(requests));
+      allOptions = typeIndexes.options === -1 ? [] : histRes[typeIndexes.options];
+      allStocks = typeIndexes.stocks === -1 ? [] : histRes[typeIndexes.stocks];
+      allTransfers = typeIndexes.transfers === -1 ? [] : histRes[typeIndexes.transfers];
+      allHistory = [];
+      legChains = [];
+      instruments = [];
+// Options Transactions
+      for (j = 0, len = allOptions.length; j < len; j++) {
+        order = allOptions[j];
+        if (Number(order.processed_premium) > 0) {
+          newOrder = {
+            ...defaultRecord,
+            type: 'option',
+            direction: order.direction,
+            date: order.updated_at,
+            ticker: order.chain_symbol,
+            strategy: order.opening_strategy || order.closing_strategy || '',
+            amount: Number(order.processed_premium),
+            quantity: Number(order.processed_quantity),
+            legIndex: legChains.length,
+            legs: []
+          };
+          ref = order.legs;
+          for (k = 0, len1 = ref.length; k < len1; k++) {
+            leg = ref[k];
+            legPrice = 0;
+            legQuantity = 0;
+            ref1 = leg.executions;
+            for (l = 0, len2 = ref1.length; l < len2; l++) {
+              execution = ref1[l];
+              legPrice += Number(execution.price);
+              legQuantity += Number(execution.quantity);
+            }
+            legChains.push(this.getUrl(leg.option));
+            newOrder.legs.push({
+              ...defaultLeg,
+              price: legPrice,
+              quantity: legQuantity,
+              side: leg.side
+            });
+          }
+          allHistory.push(newOrder);
+        }
+      }
+      optionIndex = 0;
+      legIndex = 0;
+      endIndex = allHistory[optionIndex + 1] != null ? allHistory[optionIndex + 1].legIndex : allHistory.length;
+      chainRes = (await Promise.all(legChains));
+      for (chainIndex in chainRes) {
+        if (chainIndex >= endIndex) {
+          optionIndex += 1;
+          legIndex = allHistory[optionIndex].legIndex;
+          delete allHistory[optionIndex].legIndex;
+          endIndex = allHistory[optionIndex + 1] != null ? allHistory[optionIndex + 1].legIndex : allHistory.length;
+        }
+        allHistory[optionIndex].legs[chainIndex - legIndex] = {
+          ...allHistory[optionIndex].legs[chainIndex - legIndex],
+          strike: Number(chainRes[chainIndex].strike_price),
+          type: chainRes[chainIndex].type,
+          expiration: chainRes[chainIndex].expiration_date
+        };
+      }
+      // Stock Transactions
+      stockStartIndex = allHistory.length;
+      for (m = 0, len3 = allStocks.length; m < len3; m++) {
+        stock = allStocks[m];
+        if (Number(stock.executed_notional.amount) > 0) {
+          allHistory.push({
+            ...defaultRecord,
+            type: 'stock',
+            direction: stock.side === 'sell' ? 'credit' : 'debit',
+            date: stock.updated_at,
+            amount: Number(stock.executed_notional.amount) - Number(stock.fees),
+            quantity: Number(stock.cumulative_quantity),
+            legs: []
+          });
+          instruments.push(this.getUrl(stock.instrument));
+        }
+      }
+      instRes = (await Promise.all(instruments));
+      for (instIndex in instRes) {
+        allHistory[stockStartIndex + Number(instIndex)].ticker = instRes[instIndex].symbol;
+      }
+// Account Transactions
+      for (n = 0, len4 = allTransfers.length; n < len4; n++) {
+        transfer = allTransfers[n];
+        if (transfer.state === 'completed') {
+          allHistory.push({
+            ...defaultRecord,
+            type: 'transfer',
+            direction: transfer.direction === 'withdraw' ? 'debit' : 'credit',
+            date: transfer.updated_at,
+            amount: Number(transfer.amount),
+            legs: []
+          });
+        }
+      }
+      allHistory.sort((a, b) => {
+        if (a.date > b.date) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+      return allHistory;
+    } catch (error1) {
+      error = error1;
+      throw error;
+    }
+  }
+
   //: Get Quotes
   async quotes(symbols, args = {
       chainData: false,

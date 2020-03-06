@@ -117,6 +117,7 @@ module.exports = {
   queryStr: queryStr,
   b64Dec: b64Dec,
   b64Enc: b64Enc,
+  titleCase: titleCase,
   colorPrint: colorPrint,
   detPrint: detPrint,
   roundNum: roundNum,

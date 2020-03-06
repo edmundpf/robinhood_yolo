@@ -261,6 +261,14 @@ if dataStore.configData.length > 0
 			id: 'af8d5deb-df2f-42a7-974e-7e16729937f7'
 		)
 
+	#: Test get history
+
+	describe 'getHistory()', ->
+		presetList(
+			a.getHistory,
+			'amount'
+		)
+
 	#: Test Placing Options orders, replacing, and canceling
 
 	describe 'Placing Orders', ->
@@ -269,7 +277,15 @@ if dataStore.configData.length > 0
 		dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
 		before(() ->
 			this.timeout(15000)
-			if dateNum > 160100
+			doTest = true
+			accountData = await a.getAccount()
+			if Number(accountData.buying_power) <= 0
+				p.warning("Account has no buying power, skipping")
+				doTest = false
+			if dateNum <= 160100
+				p.warning(chalk"Markets are open (#{dateNum}), skipping {cyan Placing Orders} - {magenta all}.")
+				doTest = false
+			if doTest
 				p.success("Markets are closed (#{dateNum}), will test placing orders.")
 				data = await a.findOptions(
 					'TSLA',
@@ -280,7 +296,6 @@ if dataStore.configData.length > 0
 				replace = await a.replaceOptionOrder(1, 0.02, { orderId: buy.id })
 				cancel = await a.cancelOptionOrder(replace.cancel_url)
 			else
-				p.warning(chalk"Markets are open (#{dateNum}), skipping {cyan Placing Orders} - {magenta all}.")
 				this.skip()
 		)
 

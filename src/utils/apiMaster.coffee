@@ -193,6 +193,145 @@ class Api
 		catch error
 			throw error
 
+	#: Get History
+
+	getHistory: (args={ options: true, stocks: true, banking: true }) ->
+		try
+			args = {
+				options: true
+				stocks: true
+				banking: true
+				consume: true
+				...args
+			}
+			defaultRecord =
+				broker: 'Robinhood'
+				account: this.username
+				type: ''
+				direction: ''
+				date: ''
+				ticker: ''
+				strategy: ''
+				amount: 0
+				quantity: 0
+			defaultLeg =
+				price: 0
+				quantity: 0
+				strike: 0
+				type: ''
+				expiration: ''
+				side: ''
+			requests = []
+			typeIndex = 0
+			typeIndexes = {
+				options: -1
+				stocks: -1
+				transfers: -1
+			}
+			if args.options
+				requests.push(this.optionsOrders())
+				typeIndexes.options = typeIndex
+				typeIndex += 1
+			if args.stocks
+				requests.push(this.stockOrders())
+				typeIndexes.stocks = typeIndex
+				typeIndex += 1
+			if args.banking
+				requests.push(this.getTransfers())
+				typeIndexes.transfers = typeIndex
+				typeIndex += 1
+			histRes = await Promise.all(requests)
+			allOptions = if typeIndexes.options == -1 then [] else histRes[typeIndexes.options]
+			allStocks = if typeIndexes.stocks == -1 then [] else histRes[typeIndexes.stocks]
+			allTransfers = if typeIndexes.transfers == -1 then [] else histRes[typeIndexes.transfers]
+			allHistory = []
+			legChains = []
+			instruments = []
+
+			# Options Transactions
+
+			for order in allOptions
+				if (Number(order.processed_premium) > 0)
+					newOrder = {
+						...defaultRecord
+						type: 'option'
+						direction: order.direction
+						date: order.updated_at
+						ticker: order.chain_symbol
+						strategy: order.opening_strategy || order.closing_strategy || ''
+						amount: Number(order.processed_premium)
+						quantity: Number(order.processed_quantity)
+						legIndex: legChains.length
+						legs: []
+					}
+					for leg in order.legs
+						legPrice = 0
+						legQuantity = 0
+						for execution in leg.executions
+							legPrice += Number(execution.price)
+							legQuantity += Number(execution.quantity)
+						legChains.push(this.getUrl(leg.option))
+						newOrder.legs.push({
+							...defaultLeg
+							price: legPrice
+							quantity: legQuantity
+							side: leg.side
+						})
+					allHistory.push(newOrder)
+			optionIndex = 0
+			legIndex = 0
+			endIndex = if allHistory[optionIndex + 1]? then allHistory[optionIndex + 1].legIndex else allHistory.length
+			chainRes = await Promise.all(legChains)
+			for chainIndex of chainRes
+				if (chainIndex >= endIndex)
+					optionIndex += 1
+					legIndex = allHistory[optionIndex].legIndex
+					delete allHistory[optionIndex].legIndex
+					endIndex = if allHistory[optionIndex + 1]? then allHistory[optionIndex + 1].legIndex else allHistory.length
+				allHistory[optionIndex].legs[chainIndex - legIndex] = {
+					...allHistory[optionIndex].legs[chainIndex - legIndex]
+					strike: Number(chainRes[chainIndex].strike_price)
+					type: chainRes[chainIndex].type
+					expiration: chainRes[chainIndex].expiration_date
+				}
+
+			# Stock Transactions
+
+			stockStartIndex = allHistory.length
+			for stock in allStocks
+				if (Number(stock.executed_notional.amount) > 0)
+					allHistory.push({
+						...defaultRecord
+						type: 'stock'
+						direction: if stock.side == 'sell' then 'credit' else 'debit'
+						date: stock.updated_at
+						amount: Number(stock.executed_notional.amount) - Number(stock.fees)
+						quantity: Number(stock.cumulative_quantity)
+						legs: []
+					})
+					instruments.push(this.getUrl(stock.instrument))
+			instRes = await Promise.all(instruments)
+			for instIndex of instRes
+				allHistory[stockStartIndex + Number(instIndex)].ticker = instRes[instIndex].symbol
+
+			# Account Transactions
+
+			for transfer in allTransfers
+				if (transfer.state == 'completed')
+					allHistory.push({
+						...defaultRecord
+						type: 'transfer'
+						direction: if transfer.direction == 'withdraw' then 'debit' else 'credit'
+						date: transfer.updated_at
+						amount: Number(transfer.amount)
+						legs: []
+					})
+
+			allHistory.sort((a, b) => if (a.date > b.date) then -1 else 1)
+			return allHistory
+		catch error
+			throw error
+
 	#: Get Quotes
 
 	quotes: (symbols, args={ chainData: false, consume: true }) ->

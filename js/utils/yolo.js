@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 ;
-var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dataStore, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, tradeCom, updateJson,
+var ON_DEATH, addAccountCom, api, b64Dec, b64Enc, buyCom, cancelCom, chalk, colorPrint, com, configData, dashboardCom, dataStore, dayTrades, defaults, deleteAccountCom, editAccountCom, editSettingsCom, findCom, inquirer, isNumber, main, moment, notEmpty, overwriteJson, p, parseInt, parsePrice, posCom, posWatchCom, printFind, printInPlace, printOrder, printPos, printQuotes, quoteCom, replaceCom, roundNum, sellCom, showAccountsCom, stopLossWatch, term, terminatePosition, titleCase, tradeCom, updateJson,
   indexOf = [].indexOf;
 
 chalk = require('chalk');
@@ -18,6 +18,8 @@ term = require('terminal-kit').terminal;
 ON_DEATH = require('death');
 
 roundNum = require('./miscFunctions').roundNum;
+
+titleCase = require('./miscFunctions').titleCase;
 
 colorPrint = require('./miscFunctions').colorPrint;
 
@@ -365,51 +367,79 @@ editSettingsCom = async function(com) {
 
 //: Trades Command
 tradeCom = async function(com) {
-  var amt, amtColor, cur_time, data, date, defeats, gains, j, len, losses, net, option, options, time, trade, trades, url, wins;
-  trades = {};
-  amt = gains = losses = wins = defeats = 0;
-  p.success(`Getting trade history for ${api.username}`);
-  options = (await api.optionsOrders());
-  for (j = 0, len = options.length; j < len; j++) {
-    option = options[j];
-    date = time = '';
-    if (option.state !== 'cancelled') {
-      if (option.direction === 'credit') {
-        amt = Number(option.processed_premium);
-      } else if (option.direction === 'debit') {
-        amt = Number(option.processed_premium) !== 0 ? Number(option.processed_premium) * -1 : 0;
+  var action, actions, activity, amt, amtColor, defaultAction, defeats, desc, gains, j, k, key, legExpiration, legIndex, len, len1, losses, maxExpiration, net, strategy, strike, strikesText, ticker, trade, uniqueId, wins;
+  actions = {};
+  defaultAction = {
+    date: '',
+    desc: '',
+    color: '',
+    amt: 0
+  };
+  gains = losses = wins = defeats = 0;
+  p.success(`Getting account history for ${api.username}`);
+  activity = (await api.getHistory({
+    banking: false,
+    stock: false
+  }));
+  for (j = 0, len = activity.length; j < len; j++) {
+    action = activity[j];
+    if (action.type === 'option') {
+      maxExpiration = '';
+      ticker = action.ticker;
+      uniqueId = ticker;
+      strategy = titleCase(action.strategy);
+      desc = `${ticker} ${strategy} `;
+      strikesText = [];
+      for (legIndex in action.legs) {
+        if (action.strategy.includes('spread') || action.strategy.includes('condor')) {
+          legExpiration = action.legs[legIndex].expiration;
+          if (legExpiration > maxExpiration) {
+            maxExpiration = legExpiration;
+          }
+        } else {
+          maxExpiration = action.legs[legIndex].expiration;
+        }
+        if (Number(legIndex) === 0) {
+          desc += moment(maxExpiration).format('MM-DD-YYYY') + ' | ';
+        }
+        strike = `${action.legs[legIndex].strike}${(action.legs[legIndex].type === 'call' ? 'C' : 'P')}`;
+        desc += `${strike}${(Number(legIndex) !== action.legs.length - 1 ? ',' : '')} `;
+        strikesText.push(String(strike) + action.legs[legIndex].expiration);
       }
-      try {
-        cur_time = moment(option.legs[0].executions[0].timestamp);
-        date = cur_time.format('YYYY/MM/DD');
-        time = cur_time.format('HH:mm:ss');
-      } catch (error1) {}
-      url = option.legs[0].option;
-      if (trades[url] == null) {
-        trades[url] = {
-          amt: amt,
-          symbol: option.chain_symbol,
-          date: date,
-          time: time
+      strikesText.sort((a, b) => {
+        if (a > b) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
+      for (k = 0, len1 = strikesText.length; k < len1; k++) {
+        strike = strikesText[k];
+        uniqueId += strike;
+      }
+      if (action.direction === 'credit') {
+        amt = action.amount;
+      } else {
+        amt = action.amount > 0 ? action.amount * -1 : 0;
+      }
+      if (actions[uniqueId] == null) {
+        actions[uniqueId] = {
+          ...defaultAction,
+          date: action.date,
+          desc: desc,
+          amt: amt
         };
       } else {
-        trades[url].amt += amt;
-        if (trades[url].time === '' && time !== '') {
-          trades[url].time = time;
+        if (action.date > actions[uniqueId].date) {
+          actions[uniqueId].date = action.date;
         }
+        actions[uniqueId].amt += amt;
       }
     }
   }
-  for (url in trades) {
-    trade = trades[url];
+  for (key in actions) {
+    trade = actions[key];
     amtColor = 'green';
-    data = (await api.getUrl(url));
-    Object.assign(trade, {
-      strikePrice: data.strike_price,
-      expirationDate: data.expiration_date,
-      optionType: data.type,
-      expirationDate: data.expiration_date
-    });
     if (trade.amt >= 0) {
       gains += trade.amt;
       wins += 1;
@@ -419,7 +449,7 @@ tradeCom = async function(com) {
       defeats += 1;
     }
     amt = roundNum(trade.amt);
-    p.bullet(chalk`${trade.symbol}-${trade.date}-${trade.optionType}: {${amtColor} $${amt}}`, {
+    p.bullet(chalk`${trade.desc}| {${amtColor} $${amt}}`, {
       log: false
     });
   }
