@@ -167,7 +167,7 @@ class Api
 			portfolioInfo = await this.getPortfolioInfo()
 			curTime = new Date()
 			dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
-			equity = if (dateNum >= 93000 and dateNum <= 160000) then portfolioInfo.extended_hours_equity else portfolioInfo.equity
+			equity = if (dateNum >= 93000 and dateNum <= 160000) then portfolioInfo.equity else portfolioInfo.extended_hours_equity
 			return Number(equity)
 		catch error
 			throw error

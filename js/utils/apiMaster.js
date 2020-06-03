@@ -204,7 +204,7 @@ Api = class Api {
       portfolioInfo = (await this.getPortfolioInfo());
       curTime = new Date();
       dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds();
-      equity = (dateNum >= 93000 && dateNum <= 160000) ? portfolioInfo.extended_hours_equity : portfolioInfo.equity;
+      equity = (dateNum >= 93000 && dateNum <= 160000) ? portfolioInfo.equity : portfolioInfo.extended_hours_equity;
       return Number(equity);
     } catch (error1) {
       error = error1;
