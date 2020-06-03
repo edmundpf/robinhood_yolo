@@ -102,14 +102,17 @@ class Api
 				if this.configData.a_u? || this.configData.a_u == '' || args.newLogin
 					accUrl = await this.getAccount()
 					this.accountUrl = accUrl.url
+					this.accountId = accUrl.account_number
 				else
 					this.accountUrl = this.configData.a_u
+					this.accountId = this.configData.a_i
 				Object.assign(
 					this.configData,
 					a_t: this.accessToken
 					r_t: this.refreshToken
 					a_b: this.authToken
 					a_u: this.accountUrl
+					a_i: this.accountId
 					t_s: Date.now()
 				)
 				dataStore.configData[this.configIndex] = this.configData
@@ -124,6 +127,7 @@ class Api
 				this.refreshToken = this.configData.r_t
 				this.authToken = this.configData.a_b
 				this.accountUrl = this.configData.a_u
+				this.accountId = this.configData.a_i
 				this.session.defaults.headers.common['Authorization'] = this.authToken
 			if !this.externalConfig
 				return true
@@ -142,6 +146,29 @@ class Api
 			}
 			data = await this.getUrl(endpoints.accounts(), args.consume)
 			return data[0]
+		catch error
+			throw error
+
+	#: Get Portfolio Info
+
+	getPortfolioInfo: () ->
+		try
+			if !this.accountId?
+				accountInfo = await this.getAccount()
+				this.accountId = accountInfo.account_number
+			return await this.getUrl(endpoints.portfolios(this.accountId))
+		catch error
+			throw error
+
+	#: Get Account Equity
+
+	getAccountEquity: () ->
+		try
+			portfolioInfo = await this.getPortfolioInfo()
+			curTime = new Date()
+			dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
+			equity = if (dateNum >= 93000 and dateNum <= 160000) then portfolioInfo.extended_hours_equity else portfolioInfo.equity
+			return Number(equity)
 		catch error
 			throw error
 
@@ -300,7 +327,7 @@ class Api
 
 			stockStartIndex = allHistory.length
 			for stock in allStocks
-				if (Number(stock.executed_notional.amount) > 0)
+				if (stock.executed_notional? and Number(stock.executed_notional.amount) > 0)
 					allHistory.push({
 						...defaultRecord
 						type: 'stock'

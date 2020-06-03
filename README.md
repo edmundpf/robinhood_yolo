@@ -164,6 +164,8 @@ api = require('robinhood-yolo')({
 				* r_t: Robinhood refresh token
 				* a_b: Robinhood bearer token
 				* t_s: Login timestamp
+				* a_u: Account URL
+				* a_i: Account ID
 		* print (boolean)
 			* If false, will skip optional print statements in functions, else will print all info
 	* Returns true if configData is null/undefined, else returns configData object with updated values
@@ -187,6 +189,18 @@ api = require('robinhood-yolo')({
 	* Optional args
 		* consume (boolean)
 			* if true returns all pages of data, else returns first page of data
+* *getPortfolioInfo()*
+	``` javascript
+	await api.getPortfolioInfo()
+	```
+	* Gets portfolio Info
+	* Returns dict
+* *getAccountEquity()*
+	``` javascript
+	await api.getAccountEquity()
+	```
+	* Gets account Equity
+	* Returns number
 * *getTransfers()*
 	``` javascript
 	await api.getTransfers()

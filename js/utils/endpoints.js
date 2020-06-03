@@ -30,6 +30,10 @@ endpoints = {
   accounts: function() {
     return `${api}/accounts/`;
   },
+  //: Portfolios
+  portfolios: function(accountId) {
+    return `${api}/portfolios/${accountId}/`;
+  },
   //: Markets
   marketHours: function(date) {
     return `${api}/markets/XNYS/hours/${date}/`;

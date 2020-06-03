@@ -128,14 +128,17 @@ Api = class Api {
         if ((this.configData.a_u != null) || this.configData.a_u === '' || args.newLogin) {
           accUrl = (await this.getAccount());
           this.accountUrl = accUrl.url;
+          this.accountId = accUrl.account_number;
         } else {
           this.accountUrl = this.configData.a_u;
+          this.accountId = this.configData.a_i;
         }
         Object.assign(this.configData, {
           a_t: this.accessToken,
           r_t: this.refreshToken,
           a_b: this.authToken,
           a_u: this.accountUrl,
+          a_i: this.accountId,
           t_s: Date.now()
         });
         dataStore.configData[this.configIndex] = this.configData;
@@ -147,6 +150,7 @@ Api = class Api {
         this.refreshToken = this.configData.r_t;
         this.authToken = this.configData.a_b;
         this.accountUrl = this.configData.a_u;
+        this.accountId = this.configData.a_i;
         this.session.defaults.headers.common['Authorization'] = this.authToken;
       }
       if (!this.externalConfig) {
@@ -172,6 +176,36 @@ Api = class Api {
       };
       data = (await this.getUrl(endpoints.accounts(), args.consume));
       return data[0];
+    } catch (error1) {
+      error = error1;
+      throw error;
+    }
+  }
+
+  //: Get Portfolio Info
+  async getPortfolioInfo() {
+    var accountInfo, error;
+    try {
+      if (this.accountId == null) {
+        accountInfo = (await this.getAccount());
+        this.accountId = accountInfo.account_number;
+      }
+      return (await this.getUrl(endpoints.portfolios(this.accountId)));
+    } catch (error1) {
+      error = error1;
+      throw error;
+    }
+  }
+
+  //: Get Account Equity
+  async getAccountEquity() {
+    var curTime, dateNum, equity, error, portfolioInfo;
+    try {
+      portfolioInfo = (await this.getPortfolioInfo());
+      curTime = new Date();
+      dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds();
+      equity = (dateNum >= 93000 && dateNum <= 160000) ? portfolioInfo.extended_hours_equity : portfolioInfo.equity;
+      return Number(equity);
     } catch (error1) {
       error = error1;
       throw error;
@@ -373,7 +407,7 @@ Api = class Api {
       stockStartIndex = allHistory.length;
       for (m = 0, len3 = allStocks.length; m < len3; m++) {
         stock = allStocks[m];
-        if (Number(stock.executed_notional.amount) > 0) {
+        if ((stock.executed_notional != null) && Number(stock.executed_notional.amount) > 0) {
           allHistory.push({
             ...defaultRecord,
             type: 'stock',

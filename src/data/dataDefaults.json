@@ -1,5 +1,5 @@
 {
-	"configData": [],
+	"configData": {},
 	"defaults": {
 		"stopLoss": 0.30,
 		"poorFillTime": 93500

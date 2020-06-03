@@ -76,8 +76,20 @@ if (dataStore.configData.length > 0) {
     });
   });
   //: Test Account
-  describe('account()', function() {
+  describe('getAccount()', function() {
     return presetObject(a.getAccount, 'margin_balances');
+  });
+  //: Test Portfolio
+  describe('getPortfolioInfo()', function() {
+    return presetObject(a.getPortfolioInfo, 'equity');
+  });
+  //: Test Get Equity
+  describe('getAccountEquity()', function() {
+    return it('Returns number', async function() {
+      var data;
+      data = (await a.getAccountEquity());
+      return data.should.be.a('number');
+    });
   });
   //: Test Market Hours
   describe('getMarketHours()', function() {

@@ -55,11 +55,26 @@ if dataStore.configData.length > 0
 
 	#: Test Account
 
-	describe 'account()', ->
+	describe 'getAccount()', ->
 		presetObject(
 			a.getAccount,
 			'margin_balances'
 		)
+
+	#: Test Portfolio
+
+	describe 'getPortfolioInfo()', ->
+		presetObject(
+			a.getPortfolioInfo,
+			'equity'
+		)
+
+	#: Test Get Equity
+
+	describe 'getAccountEquity()', ->
+		it 'Returns number', ->
+			data = await a.getAccountEquity()
+			data.should.be.a('number')
 
 	#: Test Market Hours
 

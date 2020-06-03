@@ -33,6 +33,11 @@ endpoints =
 	accounts: ->
 		return "#{api}/accounts/"
 
+	#: Portfolios
+
+	portfolios: (accountId) ->
+		return "#{api}/portfolios/#{accountId}/"
+
 	#: Markets
 
 	marketHours: (date) ->
