@@ -4,6 +4,8 @@
 > Robinhood Options API written in Coffeescript and console CLI w/ included account history, positions watch, etc. ☕
 
 ![CLI Help](https://i.imgur.com/1musfQe.jpg "CLI Help")
+
+**NOTE: The Robinhood API is not officially supported and is subject to change at any time. This package is also not actively maintained, so please ensure tests continue to pass before use, and use at your own risk.**
 ## Install
 * To use the CLI
 	* `npm i -g robinhood-yolo`
