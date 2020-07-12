@@ -10,9 +10,9 @@ chalk = require('chalk');
 
 p = require('print-tools-js');
 
-camelCase = require('lodash/camelCase');
+camelCase = require('lodash.camelcase');
 
-startCase = require('lodash/startCase');
+startCase = require('lodash.startcase');
 
 //: Base64 Decode
 b64Dec = function(text) {

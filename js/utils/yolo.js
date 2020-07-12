@@ -52,7 +52,7 @@ main = function() {
   //: Option Keys
   keys = ['login', 'ticker', 'url', 'id', 'expiry', 'option_type', 'strike_type', 'quantity', 'price', 'depth', 'range', 'command'];
   //: Options
-  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command_name <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]').action(async function() {
+  return com.option('-l, --login_index <login_index>', 'Change login config index', parseInt).option('-t, --ticker <ticker>', 'Add option ticker').option('-u, --url <url>', 'Add option URL').option('-i, --id <id>', 'Add ID').option('-e, --expiry <expiry>', 'Add option expiry').option('-o, --option_type <option_type>', 'Add option type').option('-s, --strike_type <strike_type>', 'Add option strike type').option('-q, --quantity <quantity>', 'Add option contracts quantity', parseInt).option('-p, --price <price>', 'Add option price', parsePrice).option('-d, --depth <depth>', 'Add option depth', parseInt).option('-r, --range <range>', 'Add option range', parseInt).option('-c, --command_name <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' + 'delete_account, edit_settings, trades, watch, quote, position, find, buy, sell, cancel, replace]').action(async function() {
     var c, error, j, k, key, len, len1, ref, results;
     try {
       if (com.login_index == null) {
@@ -103,12 +103,16 @@ main = function() {
           //: Position Watch
           } else if (c === 'watch') {
             results.push(posWatchCom(com));
-          //: Stop Loss
+          //: [***DEPRECATED***] Stop Loss
           } else if (c === 'stop_loss') {
-            results.push(stopLossWatch(com, true));
-          //: Stop Loss Simulation (logs only, WILL NOT SELL)
+            results.push(p.warning('Stop Loss functionality has been DEPRECATED'));
+          // stopLossWatch(com, true)
+
+          //: [***DEPRECATED***] Stop Loss Simulation (logs only, WILL NOT SELL)
           } else if (c === 'stop_loss_sim') {
-            results.push(stopLossWatch(com, false));
+            results.push(p.warning('Stop Loss functionality has been DEPRECATED'));
+          // stopLossWatch(com, false)
+
           //: Quotes
           } else if (c === 'quote') {
             results.push(quoteCom(com));

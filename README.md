@@ -1,7 +1,7 @@
 # Robinhood Yolo
 [![Build Status](https://travis-ci.org/edmundpf/robinhood_yolo.svg?branch=master)](https://travis-ci.org/edmundpf/robinhood_yolo)
 [![npm version](https://badge.fury.io/js/robinhood-yolo.svg)](https://badge.fury.io/js/robinhood-yolo)
-> Robinhood Options API written in Coffeescript and console CLI w/ included stop-loss, account history, positions watch, etc. ☕
+> Robinhood Options API written in Coffeescript and console CLI w/ included account history, positions watch, etc. ☕
 
 ![CLI Help](https://i.imgur.com/1musfQe.jpg "CLI Help")
 ## Install
@@ -52,7 +52,7 @@ $ yolo -h
 		``` bash
 		$ yolo -c watch
 		```
-	* **stop_loss**
+	* **DEPRECATED: stop_loss**
 		* Enable adaptive stop loss on open positions. 
 			* **NOTE:** this can prevent gains or could cause poor fills if used too close to market open, warnings are put in place to prevent this, but please use at own risk
 			* Stops max loss after 20% loss on option price
@@ -422,6 +422,11 @@ api = require('robinhood-yolo')({
 			* order object, information will be extracted from order object to replace order
 		* orderId (string)
 			* will get data from order id to replace order
+## Change Log
+* v0.4.5
+	* Deprecated stop_loss and stop_loss_sim from CLI
+	* Moved config data location from ~/node_json_db/ > ~/.json_config/robinhood/
+	* Cut down package size with by replacing lodash/uuid with only necessary sub-modules
 ## Contributing
 * To contribute, please submit a pull request!
 * If making changes to the API, run `npm run test` and confirm all tests are working

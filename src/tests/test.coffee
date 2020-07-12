@@ -4,7 +4,6 @@ chalk = require 'chalk'
 moment = require 'moment'
 assert = require('chai').assert
 should = require('chai').should()
-dataStore = require('../utils/dataStore')({ initData: true })
 
 #: List Preset
 
@@ -32,7 +31,7 @@ presetObject = (func, key, arg1, arg2, arg3, arg4, arg5, arg6) ->
 	it 'Key exists', ->
 		assert.equal(data[key]?, true)
 
-if dataStore.configData.length > 0
+if a.configData?
 
 	#: Test Constructor
 
@@ -153,7 +152,7 @@ if dataStore.configData.length > 0
 			a.findOptionHistoricals,
 			'begins_at',
 			'GE',
-			moment().subtract(moment().day() + 2, 'days').format('YYYY-MM-DD')
+			'2021-01-15'
 		)
 
 	#: Test Get Options

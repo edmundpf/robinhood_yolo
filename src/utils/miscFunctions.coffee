@@ -3,8 +3,8 @@ utf8 = require 'utf8'
 base64 = require 'base-64'
 chalk = require 'chalk'
 p = require 'print-tools-js'
-camelCase = require 'lodash/camelCase'
-startCase = require 'lodash/startCase'
+camelCase = require 'lodash.camelcase'
+startCase = require 'lodash.startcase'
 
 #: Base64 Decode
 

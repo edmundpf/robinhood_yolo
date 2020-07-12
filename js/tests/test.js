@@ -1,4 +1,4 @@
-var a, assert, chalk, dataStore, moment, p, presetList, presetObject, should;
+var a, assert, chalk, moment, p, presetList, presetObject, should;
 
 a = require('../utils/apiMaster')({
   newLogin: true
@@ -13,10 +13,6 @@ moment = require('moment');
 assert = require('chai').assert;
 
 should = require('chai').should();
-
-dataStore = require('../utils/dataStore')({
-  initData: true
-});
 
 //: List Preset
 presetList = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
@@ -50,7 +46,7 @@ presetObject = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
   });
 };
 
-if (dataStore.configData.length > 0) {
+if (a.configData != null) {
   //: Test Constructor
   describe('constructor()', function() {
     before(async function() {
@@ -137,7 +133,7 @@ if (dataStore.configData.length > 0) {
   });
   //: Test Options Historicals
   describe('optionsHistoricals()', function() {
-    return presetList(a.findOptionHistoricals, 'begins_at', 'GE', moment().subtract(moment().day() + 2, 'days').format('YYYY-MM-DD'));
+    return presetList(a.findOptionHistoricals, 'begins_at', 'GE', '2021-01-15');
   });
   //: Test Get Options
   describe('getOptions()', function() {

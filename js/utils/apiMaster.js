@@ -2,9 +2,9 @@ var Api, assert, axios, b64Dec, dataStore, detPrint, endpoints, newApiObj, p, ro
 
 p = require('print-tools-js');
 
-uuid = require('uuid/v4');
-
 assert = require('assert');
+
+uuid = require('uuidv4').uuid;
 
 endpoints = require('./endpoints');
 
@@ -58,6 +58,7 @@ Api = class Api {
       this.externalConfig = true;
     } else {
       dataStore.getDataFiles();
+      this.configData = dataStore.configData[this.configIndex];
       this.externalConfig = false;
     }
   }

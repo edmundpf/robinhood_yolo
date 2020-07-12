@@ -1,6 +1,6 @@
 p = require 'print-tools-js'
-uuid = require 'uuid/v4'
 assert = require 'assert'
+uuid = require('uuidv4').uuid
 endpoints = require './endpoints'
 axios = require 'axios'
 b64Dec = require('./miscFunctions').b64Dec
@@ -44,6 +44,7 @@ class Api
 			this.externalConfig = true
 		else
 			dataStore.getDataFiles()
+			this.configData = dataStore.configData[this.configIndex]
 			this.externalConfig = false
 
 	#: Login Flow

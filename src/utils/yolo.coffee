@@ -62,7 +62,7 @@ main = ->
 		.option('-d, --depth <depth>', 'Add option depth', parseInt)
 		.option('-r, --range <range>', 'Add option range', parseInt)
 		.option('-c, --command_name <command_name>', 'Run command(s) [dashboard, show_accounts, add_account, edit_account, ' +
-			'delete_account, edit_settings, trades, watch, stop_loss, stop_loss_sim, quote, position, find, buy, sell, cancel, replace]')
+			'delete_account, edit_settings, trades, watch, quote, position, find, buy, sell, cancel, replace]')
 		.action(() ->
 
 			try
@@ -118,6 +118,7 @@ main = ->
 							editSettingsCom(com)
 
 						#: Trades
+
 						else if c == 'trades'
 							tradeCom(com)
 
@@ -126,15 +127,17 @@ main = ->
 						else if c == 'watch'
 							posWatchCom(com)
 
-						#: Stop Loss
+						#: [***DEPRECATED***] Stop Loss
 
 						else if c == 'stop_loss'
-							stopLossWatch(com, true)
+							p.warning('Stop Loss functionality has been DEPRECATED')
+							# stopLossWatch(com, true)
 
-						#: Stop Loss Simulation (logs only, WILL NOT SELL)
+						#: [***DEPRECATED***] Stop Loss Simulation (logs only, WILL NOT SELL)
 
 						else if c == 'stop_loss_sim'
-							stopLossWatch(com, false)
+							p.warning('Stop Loss functionality has been DEPRECATED')
+							# stopLossWatch(com, false)
 
 						#: Quotes
 
