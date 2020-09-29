@@ -223,7 +223,7 @@ class Api
 
 	#: Get History
 
-	getHistory: (args={ options: true, stocks: true, banking: true }) ->
+	getHistory: (args={ options: true, stocks: true, banking: true, consume: true }) ->
 		try
 			args = {
 				options: true
@@ -257,15 +257,15 @@ class Api
 				transfers: -1
 			}
 			if args.options
-				requests.push(this.optionsOrders())
+				requests.push(this.optionsOrders({ consume: args.consume }))
 				typeIndexes.options = typeIndex
 				typeIndex += 1
 			if args.stocks
-				requests.push(this.stockOrders())
+				requests.push(this.stockOrders({ consume: args.consume }))
 				typeIndexes.stocks = typeIndex
 				typeIndex += 1
 			if args.banking
-				requests.push(this.getTransfers())
+				requests.push(this.getTransfers({ consume: args.consume }))
 				typeIndexes.transfers = typeIndex
 				typeIndex += 1
 			histRes = await Promise.all(requests)
@@ -397,10 +397,10 @@ class Api
 			}
 			data = await this.getUrl(endpoints.historicals(symbols, args.span, args.bounds))
 			if !Array.isArray(symbols)
-				return data.results[0].historicals
+				return data[0].historicals
 			else
 				symbolData = []
-				for arr in data.results
+				for arr in data
 					symbolData.push(arr.historicals)
 				return symbolData
 		catch error
@@ -770,7 +770,8 @@ class Api
 	getUrl: (url, consume=false) ->
 		try
 			if !consume
-				return (await this.session.get(url)).data
+				data = (await this.session.get(url)).data
+				return if data.results? then data.results else data
 			else
 				data = (await this.session.get(url)).data
 				pages = data.results

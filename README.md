@@ -374,14 +374,18 @@ api = require('robinhood-yolo')({
 			* if true returns all pages of data, else returns first page of data
 * *getHistory()*
 	``` javascript
-	await api.stockOrders({ options: true, stocks: true, banking: true})
+	await api.getHistory({ options: true, stocks: true, banking: true, consume: true })
 	```
 	* Returns formatted list of transactions, including options, stocks, and bank transactions
 	* Optional args
 		* options (boolean)
 			* if true gets options data
+		* stocks (boolean)
 			* if true gets stocks data
+		* banking (boolean)
 			* if true gets bank transactions data
+		* consume (boolean)
+			* if true returns all pages of data, else returns first page of data
 * *placeOptionOrder()*
 	``` javascript
 	await api.placeOptionOrder('OPTION_URL_HERE', 1.0, 0.53)
@@ -429,6 +433,8 @@ api = require('robinhood-yolo')({
 	* Deprecated stop_loss and stop_loss_sim from CLI
 	* Moved config data location from ~/node_json_db/ > ~/.json_config/robinhood/
 	* Cut down package size with by replacing lodash/uuid with only necessary sub-modules
+* v0.5.0
+	* consume: false now returns data as object instead of data.results and pagination info
 ## Contributing
 * To contribute, please submit a pull request!
 * If making changes to the API, run `npm run test` and confirm all tests are working

@@ -287,7 +287,8 @@ Api = class Api {
   async getHistory(args = {
       options: true,
       stocks: true,
-      banking: true
+      banking: true,
+      consume: true
     }) {
     var allHistory, allOptions, allStocks, allTransfers, chainIndex, chainRes, defaultLeg, defaultRecord, endIndex, error, execution, histRes, instIndex, instRes, instruments, j, k, l, leg, legChains, legIndex, legPrice, legQuantity, len, len1, len2, len3, len4, m, n, newOrder, optionIndex, order, ref, ref1, requests, stock, stockStartIndex, transfer, typeIndex, typeIndexes;
     try {
@@ -325,17 +326,23 @@ Api = class Api {
         transfers: -1
       };
       if (args.options) {
-        requests.push(this.optionsOrders());
+        requests.push(this.optionsOrders({
+          consume: args.consume
+        }));
         typeIndexes.options = typeIndex;
         typeIndex += 1;
       }
       if (args.stocks) {
-        requests.push(this.stockOrders());
+        requests.push(this.stockOrders({
+          consume: args.consume
+        }));
         typeIndexes.stocks = typeIndex;
         typeIndex += 1;
       }
       if (args.banking) {
-        requests.push(this.getTransfers());
+        requests.push(this.getTransfers({
+          consume: args.consume
+        }));
         typeIndexes.transfers = typeIndex;
         typeIndex += 1;
       }
@@ -495,7 +502,7 @@ Api = class Api {
       span: 'month',
       bounds: 'regular'
     }) {
-    var arr, data, error, j, len, ref, symbolData;
+    var arr, data, error, j, len, symbolData;
     try {
       args = {
         span: 'month',
@@ -504,12 +511,11 @@ Api = class Api {
       };
       data = (await this.getUrl(endpoints.historicals(symbols, args.span, args.bounds)));
       if (!Array.isArray(symbols)) {
-        return data.results[0].historicals;
+        return data[0].historicals;
       } else {
         symbolData = [];
-        ref = data.results;
-        for (j = 0, len = ref.length; j < len; j++) {
-          arr = ref[j];
+        for (j = 0, len = data.length; j < len; j++) {
+          arr = data[j];
           symbolData.push(arr.historicals);
         }
         return symbolData;
@@ -1029,7 +1035,12 @@ Api = class Api {
     var data, error, pages;
     try {
       if (!consume) {
-        return ((await this.session.get(url))).data;
+        data = ((await this.session.get(url))).data;
+        if (data.results != null) {
+          return data.results;
+        } else {
+          return data;
+        }
       } else {
         data = ((await this.session.get(url))).data;
         pages = data.results;

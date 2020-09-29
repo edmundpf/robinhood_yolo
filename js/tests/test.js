@@ -233,7 +233,9 @@ if (a.configData != null) {
   });
   //: Test get history
   describe('getHistory()', function() {
-    return presetList(a.getHistory, 'amount');
+    return presetList(a.getHistory, 'amount', {
+      consume: false
+    });
   });
   //: Test Placing Options orders, replacing, and canceling
   describe('Placing Orders', function() {

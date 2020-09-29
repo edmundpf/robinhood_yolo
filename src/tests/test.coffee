@@ -280,7 +280,8 @@ if a.configData?
 	describe 'getHistory()', ->
 		presetList(
 			a.getHistory,
-			'amount'
+			'amount',
+			consume: false
 		)
 
 	#: Test Placing Options orders, replacing, and canceling
