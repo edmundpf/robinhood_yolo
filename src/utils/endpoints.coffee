@@ -4,6 +4,7 @@ queryStr = require('./miscFunctions').queryStr
 #: Api URL
 
 api = 'https://api.robinhood.com'
+cashier = 'https://cashier.robinhood.com'
 
 #: Appropriate span/interval combos
 
@@ -46,7 +47,7 @@ endpoints =
 	#: Transfers
 
 	transfers: ->
-		return "#{api}/ach/transfers/"
+		return "#{cashier}/ach/transfers/"
 
 	#: Get Quotes for stock or list of stocks
 

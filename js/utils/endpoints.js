@@ -1,4 +1,4 @@
-var api, endpoints, intervals, p, queryStr;
+var api, cashier, endpoints, intervals, p, queryStr;
 
 p = require('print-tools-js');
 
@@ -6,6 +6,8 @@ queryStr = require('./miscFunctions').queryStr;
 
 //: Api URL
 api = 'https://api.robinhood.com';
+
+cashier = 'https://cashier.robinhood.com';
 
 //: Appropriate span/interval combos
 intervals = {
@@ -40,7 +42,7 @@ endpoints = {
   },
   //: Transfers
   transfers: function() {
-    return `${api}/ach/transfers/`;
+    return `${cashier}/ach/transfers/`;
   },
   //: Get Quotes for stock or list of stocks
   quotes: function(symbols) {

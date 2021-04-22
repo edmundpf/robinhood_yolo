@@ -435,6 +435,9 @@ api = require('robinhood-yolo')({
 	* Cut down package size with by replacing lodash/uuid with only necessary sub-modules
 * v0.5.0
 	* consume: false now returns data as object instead of data.results and pagination info
+* v0.5.1
+	* getTransfers() method changed to reflect new cashier.robinhood.com endpoint
+	* tests updated and all passing
 ## Contributing
 * To contribute, please submit a pull request!
 * If making changes to the API, run `npm run test` and confirm all tests are working

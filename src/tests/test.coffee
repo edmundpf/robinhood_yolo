@@ -5,6 +5,12 @@ moment = require 'moment'
 assert = require('chai').assert
 should = require('chai').should()
 
+# Test Option
+
+testOption =
+	ticker: 'SPY',
+	date: '2023-12-15',
+
 #: List Preset
 
 presetList = (func, key, arg1, arg2, arg3, arg4, arg5, arg6) ->
@@ -151,8 +157,8 @@ if a.configData?
 		presetList(
 			a.findOptionHistoricals,
 			'begins_at',
-			'GE',
-			'2021-01-15'
+			testOption.ticker
+			testOption.date
 		)
 
 	#: Test Get Options
@@ -161,8 +167,8 @@ if a.configData?
 		presetList(
 			a.getOptions,
 			'market_data',
-			'GE',
-			'2021-01-15',
+			testOption.ticker,
+			testOption.date,
 			optionType: 'call'
 			marketData: true
 		)
@@ -173,8 +179,8 @@ if a.configData?
 		presetObject(
 			a.findOptions,
 			'market_data',
-			'GE',
-			'2021-01-15',
+			testOption.ticker,
+			testOption.date,
 			optionType: 'call'
 			strikeType: 'itm'
 			strikeDepth: 0
@@ -187,8 +193,8 @@ if a.configData?
 		presetObject(
 			a.findOptions,
 			'market_data',
-			'GE',
-			'2021-01-15',
+			testOption.ticker,
+			testOption.date,
 			optionType: 'call'
 			strike: 11.00
 			marketData: true
@@ -200,8 +206,8 @@ if a.configData?
 		presetList(
 			a.findOptions,
 			'strike_price',
-			'GE',
-			'2021-01-15',
+			testOption.ticker,
+			testOption.date,
 			optionType: 'call'
 			range: 3
 		)
@@ -303,9 +309,9 @@ if a.configData?
 			if doTest
 				p.success("Markets are closed (#{dateNum}), will test placing orders.")
 				data = await a.findOptions(
-					'TSLA',
-					'2021-01-15',
-					strikeDepth: 3
+					testOption.ticker,
+					testOption.date,
+					strikeDepth: 7
 				)
 				buy = await a.placeOptionOrder(data.url, 1, 0.01)
 				replace = await a.replaceOptionOrder(1, 0.02, { orderId: buy.id })

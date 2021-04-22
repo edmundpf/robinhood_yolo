@@ -1,4 +1,4 @@
-var a, assert, chalk, moment, p, presetList, presetObject, should;
+var a, assert, chalk, moment, p, presetList, presetObject, should, testOption;
 
 a = require('../utils/apiMaster')({
   newLogin: true
@@ -13,6 +13,12 @@ moment = require('moment');
 assert = require('chai').assert;
 
 should = require('chai').should();
+
+// Test Option
+testOption = {
+  ticker: 'SPY',
+  date: '2023-12-15'
+};
 
 //: List Preset
 presetList = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
@@ -133,18 +139,18 @@ if (a.configData != null) {
   });
   //: Test Options Historicals
   describe('optionsHistoricals()', function() {
-    return presetList(a.findOptionHistoricals, 'begins_at', 'GE', '2021-01-15');
+    return presetList(a.findOptionHistoricals, 'begins_at', testOption.ticker, testOption.date);
   });
   //: Test Get Options
   describe('getOptions()', function() {
-    return presetList(a.getOptions, 'market_data', 'GE', '2021-01-15', {
+    return presetList(a.getOptions, 'market_data', testOption.ticker, testOption.date, {
       optionType: 'call',
       marketData: true
     });
   });
   //: Test Find Options for single option
   describe('findOptions() - single', function() {
-    return presetObject(a.findOptions, 'market_data', 'GE', '2021-01-15', {
+    return presetObject(a.findOptions, 'market_data', testOption.ticker, testOption.date, {
       optionType: 'call',
       strikeType: 'itm',
       strikeDepth: 0,
@@ -153,7 +159,7 @@ if (a.configData != null) {
   });
   //: Test Find Options by strike price
   describe('findOptions() - strike', function() {
-    return presetObject(a.findOptions, 'market_data', 'GE', '2021-01-15', {
+    return presetObject(a.findOptions, 'market_data', testOption.ticker, testOption.date, {
       optionType: 'call',
       strike: 11.00,
       marketData: true
@@ -161,7 +167,7 @@ if (a.configData != null) {
   });
   //: Test Find Options for multiple options
   describe('findOptions() - range', function() {
-    return presetList(a.findOptions, 'strike_price', 'GE', '2021-01-15', {
+    return presetList(a.findOptions, 'strike_price', testOption.ticker, testOption.date, {
       optionType: 'call',
       range: 3
     });
@@ -258,8 +264,8 @@ if (a.configData != null) {
       }
       if (doTest) {
         p.success(`Markets are closed (${dateNum}), will test placing orders.`);
-        data = (await a.findOptions('TSLA', '2021-01-15', {
-          strikeDepth: 3
+        data = (await a.findOptions(testOption.ticker, testOption.date, {
+          strikeDepth: 7
         }));
         buy = (await a.placeOptionOrder(data.url, 1, 0.01));
         replace = (await a.replaceOptionOrder(1, 0.02, {
