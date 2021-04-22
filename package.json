@@ -1,6 +1,6 @@
 {
   "name": "robinhood-yolo",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "NodeJS API wrapper for Robinhood Options trading and CLI to trade from your terminal",
   "main": "./js/index.js",
   "files": [
@@ -9,7 +9,7 @@
   "scripts": {
     "test_prepare": "mv /root/node_json_db/yolo_config.json /root/node_json_db/dummy_config.json",
     "test_finish": "mv /root/node_json_db/dummy_config.json /root/node_json_db/yolo_config.json",
-		"dev-checkout": "git checkout dev",
+    "dev-checkout": "git checkout dev",
     "commit": "npm run dev-checkout && git add . && git commit -m",
     "bump-patch": "npm run dev-checkout && npm version patch",
     "bump-minor": "npm run dev-checkout && npm version minor",
@@ -20,7 +20,7 @@
     "release-major": "npm run bump-major && npm run release",
     "test": "./node_modules/.bin/mocha js/tests",
     "compile": "grunt sync",
-		"watch": "grunt watch"
+    "watch": "grunt watch"
   },
   "bin": {
     "yolo": "./js/utils/yolo.js"
