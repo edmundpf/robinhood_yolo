@@ -1,4 +1,4 @@
-var a, assert, chalk, moment, p, presetList, presetObject, should, testOption;
+var TIMEOUT, a, assert, chalk, moment, p, presetList, presetObject, should, testOption;
 
 a = require('../utils/apiMaster')({
   newLogin: true
@@ -14,6 +14,8 @@ assert = require('chai').assert;
 
 should = require('chai').should();
 
+TIMEOUT = 25000;
+
 // Test Option
 testOption = {
   ticker: 'SPY',
@@ -25,7 +27,7 @@ presetList = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
   var data;
   data = null;
   before(async function() {
-    this.timeout(15000);
+    this.timeout(TIMEOUT);
     return data = (await func.bind(a)(arg1, arg2, arg3, arg4, arg5, arg6));
   });
   it('Returns array', function() {
@@ -41,7 +43,7 @@ presetObject = function(func, key, arg1, arg2, arg3, arg4, arg5, arg6) {
   var data;
   data = null;
   before(async function() {
-    this.timeout(15000);
+    this.timeout(TIMEOUT);
     return data = (await func.bind(a)(arg1, arg2, arg3, arg4, arg5, arg6));
   });
   it('Returns object', function() {
@@ -90,6 +92,14 @@ if (a.configData != null) {
     return it('Returns number', async function() {
       var data;
       data = (await a.getAccountEquity());
+      return data.should.be.a('number');
+    });
+  });
+  //: Test Get Cash Balance
+  describe('getCashBalance()', function() {
+    return it('Returns number', async function() {
+      var data;
+      data = (await a.getCashBalance());
       return data.should.be.a('number');
     });
   });
@@ -185,7 +195,7 @@ if (a.configData != null) {
     var data;
     data = null;
     before(async function() {
-      this.timeout(15000);
+      this.timeout(TIMEOUT);
       return data = (await a.optionsPositions({
         marketData: true,
         orderData: true
@@ -213,7 +223,7 @@ if (a.configData != null) {
     var data;
     data = null;
     before(async function() {
-      this.timeout(15000);
+      this.timeout(TIMEOUT);
       return data = (await a.optionsOrders({
         notFilled: true
       }));
@@ -251,7 +261,7 @@ if (a.configData != null) {
     dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds();
     before(async function() {
       var accountData, data, doTest;
-      this.timeout(15000);
+      this.timeout(TIMEOUT);
       doTest = true;
       accountData = (await a.getAccount());
       if (Number(accountData.buying_power) <= 0) {

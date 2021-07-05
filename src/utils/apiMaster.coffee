@@ -173,6 +173,15 @@ class Api
 		catch error
 			throw error
 
+	#: Get Cash Balance
+
+	getCashBalance: () ->
+		accountInfo = await this.getAccount()
+		cash = Number(accountInfo.margin_balances.cash) || 0
+		unclearedDeposits = Number(accountInfo.margin_balances.uncleared_deposits) || 0
+		cashBalance = cash - unclearedDeposits
+		return cashBalance
+
 	#: Get Transfers
 
 	getTransfers: (args={consume: true}) ->

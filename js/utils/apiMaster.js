@@ -213,6 +213,16 @@ Api = class Api {
     }
   }
 
+  //: Get Cash Balance
+  async getCashBalance() {
+    var accountInfo, cash, cashBalance, unclearedDeposits;
+    accountInfo = (await this.getAccount());
+    cash = Number(accountInfo.margin_balances.cash) || 0;
+    unclearedDeposits = Number(accountInfo.margin_balances.uncleared_deposits) || 0;
+    cashBalance = cash - unclearedDeposits;
+    return cashBalance;
+  }
+
   //: Get Transfers
   async getTransfers(args = {
       consume: true

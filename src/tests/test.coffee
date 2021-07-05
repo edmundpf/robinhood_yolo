@@ -4,6 +4,7 @@ chalk = require 'chalk'
 moment = require 'moment'
 assert = require('chai').assert
 should = require('chai').should()
+TIMEOUT = 25000
 
 # Test Option
 
@@ -16,7 +17,7 @@ testOption =
 presetList = (func, key, arg1, arg2, arg3, arg4, arg5, arg6) ->
 	data = null
 	before(() ->
-		this.timeout(15000)
+		this.timeout(TIMEOUT)
 		data = await func.bind(a)(arg1, arg2, arg3, arg4, arg5, arg6)
 	)
 	it 'Returns array', ->
@@ -29,7 +30,7 @@ presetList = (func, key, arg1, arg2, arg3, arg4, arg5, arg6) ->
 presetObject = (func, key, arg1, arg2, arg3, arg4, arg5, arg6) ->
 	data = null
 	before(() ->
-		this.timeout(15000)
+		this.timeout(TIMEOUT)
 		data = await func.bind(a)(arg1, arg2, arg3, arg4, arg5, arg6)
 	)
 	it 'Returns object', ->
@@ -79,6 +80,13 @@ if a.configData?
 	describe 'getAccountEquity()', ->
 		it 'Returns number', ->
 			data = await a.getAccountEquity()
+			data.should.be.a('number')
+
+	#: Test Get Cash Balance
+
+	describe 'getCashBalance()', ->
+		it 'Returns number', ->
+			data = await a.getCashBalance()
 			data.should.be.a('number')
 
 	#: Test Market Hours
@@ -228,7 +236,7 @@ if a.configData?
 	describe 'optionsPositions() - open only', ->
 		data = null
 		before(() ->
-			this.timeout(15000)
+			this.timeout(TIMEOUT)
 			data = await a.optionsPositions(
 				marketData: true
 				orderData: true
@@ -257,7 +265,7 @@ if a.configData?
 	describe 'optionsOrders() - not filled', ->
 		data = null
 		before(() ->
-			this.timeout(15000)
+			this.timeout(TIMEOUT)
 			data = await a.optionsOrders(
 				notFilled: true
 			)
@@ -297,7 +305,7 @@ if a.configData?
 		buy = replace = cancel = null
 		dateNum = (curTime.getHours() * 10000) + (curTime.getMinutes() * 100) + curTime.getSeconds()
 		before(() ->
-			this.timeout(15000)
+			this.timeout(TIMEOUT)
 			doTest = true
 			accountData = await a.getAccount()
 			if Number(accountData.buying_power) <= 0

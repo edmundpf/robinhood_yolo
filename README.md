@@ -203,6 +203,12 @@ api = require('robinhood-yolo')({
 	```
 	* Gets account Equity
 	* Returns number
+* *getCashBalance()*
+	``` javascript
+	await api.getCashBalance()
+	```
+	* Gets Robinhood Cash Balance
+	* Returns number
 * *getTransfers()*
 	``` javascript
 	await api.getTransfers()
@@ -438,6 +444,8 @@ api = require('robinhood-yolo')({
 * v0.5.1
 	* getTransfers() method changed to reflect new cashier.robinhood.com endpoint
 	* tests updated and all passing
+* v0.5.2
+	* getCashBalance() method added
 ## Contributing
 * To contribute, please submit a pull request!
 * If making changes to the API, run `npm run test` and confirm all tests are working
