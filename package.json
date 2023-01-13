@@ -58,7 +58,7 @@
     "lodash.startcase": "^4.4.0",
     "moment": "^2.24.0",
     "print-tools-js": "^1.2.0",
-    "terminal-kit": "^1.28.3",
+    "terminal-kit": "^2.1.8",
     "utf8": "^3.0.0",
     "uuidv4": "^6.1.1"
   },
